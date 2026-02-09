@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { WordData, UserSettings } from './types';
 import { fetchWordStage1, fetchWordStage2, fetchWordStage3, getQuickDefinition } from './services/geminiService';
-import { saveWordToHistory } from './services/storageService';
+import { saveWordToHistory, saveSettings, loadSettings, getDefaultSettings } from './services/storageService';
 import { migrateFromLocalStorage } from './services/db';
 import Dashboard from './components/dashboard/Dashboard';
 import WordDisplay from './components/WordDisplay';
@@ -9,6 +9,7 @@ import ReviewSchedule from './components/ReviewSchedule';
 import StudyTab from './components/StudyTab';
 import ContextualImageSearch from './components/ContextualImageSearch';
 import QuickDefinition from './components/QuickDefinition';
+import FocusOverlay from './components/FocusOverlay';
 import { SearchIcon, GraduationCapIcon, SettingsIcon, BookOpenIcon, XIcon, LayoutGridIcon } from './components/Icons';
 
 type Tab = 'search' | 'study' | 'dashboard';
@@ -24,18 +25,15 @@ const App: React.FC = () => {
   const [loadingStage, setLoadingStage] = useState(0);
   const [error, setError] = useState<string | null>(null);
   
-  const [settings, setSettings] = useState<UserSettings>({
-    showMnemonics: true,
-    autoAudio: false,
-    lookupHistory: [],
-  });
+  const [settings, setSettings] = useState<UserSettings>(getDefaultSettings());
   const [showSettings, setShowSettings] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize DB
+  // Initialize DB and load settings
   useEffect(() => {
     migrateFromLocalStorage();
+    loadSettings().then(setSettings);
   }, []);
 
   // Quick Definition State
@@ -179,7 +177,40 @@ const App: React.FC = () => {
   };
 
   const toggleSetting = (key: keyof UserSettings) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+    setSettings(prev => {
+      const newSettings = { ...prev, [key]: !prev[key] };
+      saveSettings(newSettings);
+      return newSettings;
+    });
+  };
+
+  const updateFocusIntensity = (intensity: number) => {
+    setSettings(prev => {
+      const newSettings = { 
+        ...prev, 
+        focusOverlay: { 
+          ...prev.focusOverlay, 
+          enabled: prev.focusOverlay?.enabled ?? false,
+          intensity 
+        } 
+      };
+      saveSettings(newSettings);
+      return newSettings;
+    });
+  };
+
+  const toggleFocusOverlay = () => {
+    setSettings(prev => {
+      const newSettings = { 
+        ...prev, 
+        focusOverlay: { 
+          enabled: !(prev.focusOverlay?.enabled ?? false),
+          intensity: prev.focusOverlay?.intensity ?? 0.5
+        } 
+      };
+      saveSettings(newSettings);
+      return newSettings;
+    });
   };
 
   const triggerSearchModal = () => {
@@ -191,6 +222,7 @@ const App: React.FC = () => {
     <div className="min-h-screen text-slate-100 pb-20 selection:bg-orange-500 selection:text-white">
       {/* Visual Overlays */}
       <ContextualImageSearch />
+      <FocusOverlay settings={settings.focusOverlay ?? { enabled: false, intensity: 0.5 }} />
       
       {quickDef && (
         <QuickDefinition 
@@ -321,18 +353,64 @@ const App: React.FC = () => {
               </button>
               
               {showSettings && (
-                <div className="absolute right-0 top-12 w-64 bg-slate-900 border border-slate-700 shadow-2xl rounded-xl p-5 z-50 animate-fade-in">
+                <div className="absolute right-0 top-12 w-80 bg-slate-900 border border-slate-700 shadow-2xl rounded-xl p-5 z-50 animate-fade-in">
                   <h3 className="font-bold text-white mb-4 border-b border-slate-700 pb-2">Preferences</h3>
                   
                   <div className="space-y-4">
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <label className="flex items-center justify-between cursor-pointer group">
-                        <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Mnemonics</span>
+                        <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Show Mnemonics</span>
                         <input 
                           type="checkbox" 
                           checked={settings.showMnemonics} 
                           onChange={() => toggleSetting('showMnemonics')}
                           className="accent-orange-500" 
+                        />
+                      </label>
+
+                      <label className="flex items-center justify-between cursor-pointer group">
+                        <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Show Visual Learning</span>
+                        <input 
+                          type="checkbox" 
+                          checked={settings.showVisuals ?? false} 
+                          onChange={() => toggleSetting('showVisuals')}
+                          className="accent-orange-500" 
+                        />
+                      </label>
+
+                      <label className="flex items-center justify-between cursor-pointer group">
+                        <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Focus Overlay</span>
+                        <input 
+                          type="checkbox" 
+                          checked={settings.focusOverlay?.enabled ?? false} 
+                          onChange={toggleFocusOverlay}
+                          className="accent-orange-500" 
+                        />
+                      </label>
+
+                      {settings.focusOverlay?.enabled && (
+                        <div className="pl-4 space-y-2">
+                          <label className="text-xs text-slate-400">Overlay Intensity</label>
+                          <input 
+                            type="range" 
+                            min="0.1" 
+                            max="0.9" 
+                            step="0.1"
+                            value={settings.focusOverlay?.intensity ?? 0.5}
+                            onChange={(e) => updateFocusIntensity(parseFloat(e.target.value))}
+                            className="w-full accent-orange-500"
+                          />
+                        </div>
+                      )}
+
+                      <label className="flex items-center justify-between cursor-pointer group">
+                        <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Auto Audio (Coming Soon)</span>
+                        <input 
+                          type="checkbox" 
+                          checked={settings.autoAudio} 
+                          onChange={() => toggleSetting('autoAudio')}
+                          className="accent-orange-500" 
+                          disabled
                         />
                       </label>
                     </div>
@@ -441,6 +519,7 @@ const App: React.FC = () => {
                   loadingStage={loadingStage}
                   onWordClick={handleWordClick}
                   onWordDoubleClick={handleWordDoubleClick}
+                  onRelatedWordClick={(word) => handleSearch(undefined, word)}
                 />
                 
                 {loadingStage >= 2 && <ReviewSchedule data={wordData} />}

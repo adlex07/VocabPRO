@@ -1,6 +1,47 @@
-import { WordData, QuizPerformance } from "../types";
+import { WordData, QuizPerformance, UserSettings } from "../types";
 import { db, createEmptyQuizPerformance } from "./db";
 import { createInitialFSRS, type FSRSData } from "./fsrsService";
+
+// Default settings
+export const getDefaultSettings = (): UserSettings => ({
+  showMnemonics: true,
+  autoAudio: false,
+  lookupHistory: [],
+  showVisuals: false,
+  focusOverlay: {
+    enabled: false,
+    intensity: 0.5
+  }
+});
+
+export const saveSettings = async (settings: UserSettings): Promise<void> => {
+  try {
+    const settingsJson = JSON.stringify(settings);
+    const existing = await db.settings.where('key').equals('userSettings').first();
+    
+    if (existing) {
+      await db.settings.update(existing.id!, { value: settingsJson });
+    } else {
+      await db.settings.add({ key: 'userSettings', value: settingsJson });
+    }
+  } catch (error) {
+    console.error("Failed to save settings", error);
+  }
+};
+
+export const loadSettings = async (): Promise<UserSettings> => {
+  try {
+    const record = await db.settings.where('key').equals('userSettings').first();
+    if (record && record.value) {
+      const settings = JSON.parse(record.value) as UserSettings;
+      // Merge with defaults to handle new settings fields
+      return { ...getDefaultSettings(), ...settings };
+    }
+  } catch (error) {
+    console.error("Failed to load settings", error);
+  }
+  return getDefaultSettings();
+};
 
 export const saveWordToHistory = async (wordData: WordData): Promise<void> => {
   try {

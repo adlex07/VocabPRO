@@ -6,6 +6,7 @@ import ElaborationSection from './ElaborationSection';
 import ArabicAssociations from './ArabicAssociations';
 import InteractiveText from './InteractiveText';
 import ReviewSchedule from './ReviewSchedule';
+import VisualLearning from './VisualLearning';
 
 interface WordDisplayProps {
   data: Partial<WordData>;
@@ -13,6 +14,7 @@ interface WordDisplayProps {
   loadingStage: number; // 0=idle, 1=core, 2=context, 3=deep, 4=done
   onWordClick: (word: string, rect: DOMRect) => void;
   onWordDoubleClick: (word: string) => void;
+  onRelatedWordClick?: (word: string) => void;
 }
 
 const SkeletonLine = ({ className }: { className?: string }) => (
@@ -31,7 +33,8 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
   settings, 
   loadingStage,
   onWordClick, 
-  onWordDoubleClick 
+  onWordDoubleClick,
+  onRelatedWordClick
 }) => {
   const mastery = data.mastery || 0;
   
@@ -159,11 +162,14 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
           </div>
       ) : data.deepLearning ? (
          <div className="animate-fade-in">
+            {/* Visual Learning */}
+            {data.word && <VisualLearning data={data as WordData} settings={{ showVisuals: settings.showVisuals ?? false }} />}
+
             {/* Arabic Associations */}
             {data.word && <ArabicAssociations data={data as WordData} />}
 
             {/* Deep Learning Modules */}
-            {data.word && <DeepLearning data={data as WordData} />}
+            {data.word && <DeepLearning data={data as WordData} onRelatedWordClick={onRelatedWordClick} />}
          </div>
       ) : null}
 

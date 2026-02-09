@@ -103,6 +103,10 @@ export interface UserSettings {
   autoAudio: boolean;
   lookupHistory: string[];
   showVisuals?: boolean;
+  focusOverlay?: {
+    enabled: boolean;
+    intensity: number;
+  };
 }
 
 export interface FocusSettings {

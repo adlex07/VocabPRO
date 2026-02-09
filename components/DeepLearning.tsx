@@ -4,6 +4,7 @@ import { LightbulbIcon, PuzzleIcon, NetworkIcon, ChevronDownIcon } from './Icons
 
 interface DeepLearningProps {
   data: WordData;
+  onRelatedWordClick?: (word: string) => void;
 }
 
 const ExpandableSection = ({ 
@@ -45,7 +46,7 @@ const ExpandableSection = ({
   );
 };
 
-const DeepLearning: React.FC<DeepLearningProps> = ({ data }) => {
+const DeepLearning: React.FC<DeepLearningProps> = ({ data, onRelatedWordClick }) => {
   const { deepLearning } = data;
   
   if (!deepLearning) return null;
@@ -190,7 +191,11 @@ const DeepLearning: React.FC<DeepLearningProps> = ({ data }) => {
               <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">Related Words to Learn Next</h4>
               <div className="flex gap-3">
                  {deepLearning.relatedWords?.map((word, idx) => (
-                    <button key={idx} className="text-emerald-600 font-medium hover:underline hover:text-emerald-700">
+                    <button 
+                      key={idx} 
+                      className="text-emerald-600 font-medium hover:underline hover:text-emerald-700 transition-colors"
+                      onClick={() => onRelatedWordClick?.(word)}
+                    >
                        {word}
                     </button>
                  ))}
