@@ -1,0 +1,5 @@
+{
+  "name": "DeepVocab Tutor",
+  "description": "A deep learning dictionary web application that acts as a personal tutor, using spaced repetition and active recall principles.",
+  "requestFramePermissions": []
+}
