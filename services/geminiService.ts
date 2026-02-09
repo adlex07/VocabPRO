@@ -80,6 +80,11 @@ export const fetchWordStage3 = async (word: string): Promise<Partial<WordData>> 
     - synonyms: list with nuance.
     - antonyms: list.
     - relatedWords: list.
+    - visual: REQUIRED object with:
+      * imageDescription: Detailed visual scene for the word (vivid, concrete, memorable)
+      * spatialCue: Where in space to place this memory (e.g., "on a bookshelf", "in a garden")
+      * colorAssociation: What color represents this word's meaning
+      * lociContext: How to place this in a memory palace (Method of Loci)
 
     QUIZ:
     - multipleChoiceOptions: 4 options (1 correct). The options MUST be descriptive definitions (5-15 words long) that explain the meaning. DO NOT use single words. DO NOT use the target word itself in the options. The WRONG options must be plausible and semantically close - they should describe meanings of words in the same domain or category. NEVER use obvious opposites or unrelated meanings as distractors.
@@ -118,9 +123,19 @@ export const fetchWordStage3 = async (word: string): Promise<Partial<WordData>> 
               },
               antonyms: { type: Type.ARRAY, items: { type: Type.STRING } },
               relatedWords: { type: Type.ARRAY, items: { type: Type.STRING } },
-              arabicAssociations: { type: Type.ARRAY, items: { type: Type.STRING } }
+              arabicAssociations: { type: Type.ARRAY, items: { type: Type.STRING } },
+              visual: {
+                type: Type.OBJECT,
+                properties: {
+                  imageDescription: { type: Type.STRING },
+                  spatialCue: { type: Type.STRING },
+                  colorAssociation: { type: Type.STRING },
+                  lociContext: { type: Type.STRING }
+                },
+                required: ["imageDescription", "spatialCue", "colorAssociation", "lociContext"]
+              }
             },
-            required: ["conceptOrigin", "comparisons", "analogy", "mentalImage", "memoryStory", "mnemonic", "associationPrompt", "etymology", "synonyms", "antonyms", "relatedWords"]
+            required: ["conceptOrigin", "comparisons", "analogy", "mentalImage", "memoryStory", "mnemonic", "associationPrompt", "etymology", "synonyms", "antonyms", "relatedWords", "visual"]
           },
           quiz: {
             type: Type.OBJECT,
