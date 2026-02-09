@@ -39,8 +39,20 @@ export const loadSettings = async (): Promise<UserSettings> => {
     const record = await db.settings.where('key').equals('userSettings').first();
     if (record && record.value) {
       const settings = JSON.parse(record.value) as UserSettings;
-      // Merge with defaults to handle new settings fields
-      return { ...getDefaultSettings(), ...settings };
+      // Deep merge with defaults to handle nested objects properly
+      const defaults = getDefaultSettings();
+      return {
+        ...defaults,
+        ...settings,
+        focusOverlay: {
+          ...defaults.focusOverlay,
+          ...(settings.focusOverlay || {})
+        },
+        audioSettings: {
+          ...defaults.audioSettings,
+          ...(settings.audioSettings || {})
+        }
+      };
     }
   } catch (error) {
     console.error("Failed to load settings", error);

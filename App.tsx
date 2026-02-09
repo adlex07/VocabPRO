@@ -14,6 +14,9 @@ import { SearchIcon, GraduationCapIcon, SettingsIcon, BookOpenIcon, XIcon, Layou
 
 type Tab = 'search' | 'study' | 'dashboard';
 
+// Helper to get default focus overlay settings
+const getDefaultFocusOverlay = () => ({ enabled: false, intensity: 0.5 });
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('search');
   const [query, setQuery] = useState('');
@@ -186,11 +189,11 @@ const App: React.FC = () => {
 
   const updateFocusIntensity = (intensity: number) => {
     setSettings(prev => {
+      const focusOverlay = prev.focusOverlay || getDefaultFocusOverlay();
       const newSettings = { 
         ...prev, 
         focusOverlay: { 
-          ...prev.focusOverlay, 
-          enabled: prev.focusOverlay?.enabled ?? false,
+          ...focusOverlay,
           intensity 
         } 
       };
@@ -201,11 +204,12 @@ const App: React.FC = () => {
 
   const toggleFocusOverlay = () => {
     setSettings(prev => {
+      const focusOverlay = prev.focusOverlay || getDefaultFocusOverlay();
       const newSettings = { 
         ...prev, 
         focusOverlay: { 
-          enabled: !(prev.focusOverlay?.enabled ?? false),
-          intensity: prev.focusOverlay?.intensity ?? 0.5
+          enabled: !focusOverlay.enabled,
+          intensity: focusOverlay.intensity
         } 
       };
       saveSettings(newSettings);
@@ -238,7 +242,7 @@ const App: React.FC = () => {
     <div className="min-h-screen text-slate-100 pb-20 selection:bg-orange-500 selection:text-white">
       {/* Visual Overlays */}
       <ContextualImageSearch />
-      <FocusOverlay settings={settings.focusOverlay ?? { enabled: false, intensity: 0.5 }} />
+      <FocusOverlay settings={settings.focusOverlay || getDefaultFocusOverlay()} />
       
       {quickDef && (
         <QuickDefinition 

@@ -11,7 +11,7 @@ interface SpeakerButtonProps {
 
 const SpeakerButton: React.FC<SpeakerButtonProps> = ({ text, settings, className = '', size = 'md' }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   // Cleanup timeout on unmount
   useEffect(() => {
