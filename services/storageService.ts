@@ -11,6 +11,11 @@ export const getDefaultSettings = (): UserSettings => ({
   focusOverlay: {
     enabled: false,
     intensity: 0.5
+  },
+  audioSettings: {
+    speed: 1.0,
+    voice: undefined,
+    autoPlay: false
   }
 });
 

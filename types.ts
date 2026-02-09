@@ -107,6 +107,11 @@ export interface UserSettings {
     enabled: boolean;
     intensity: number;
   };
+  audioSettings?: {
+    speed: number;
+    voice?: string;
+    autoPlay: boolean;
+  };
 }
 
 export interface FocusSettings {

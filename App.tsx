@@ -213,6 +213,22 @@ const App: React.FC = () => {
     });
   };
 
+  const updateAudioSpeed = (speed: number) => {
+    setSettings(prev => {
+      const newSettings = { 
+        ...prev, 
+        audioSettings: { 
+          ...prev.audioSettings,
+          speed,
+          voice: prev.audioSettings?.voice,
+          autoPlay: prev.audioSettings?.autoPlay ?? false
+        } 
+      };
+      saveSettings(newSettings);
+      return newSettings;
+    });
+  };
+
   const triggerSearchModal = () => {
     setQuery('');
     setIsSearchModalOpen(true);
@@ -402,6 +418,28 @@ const App: React.FC = () => {
                           />
                         </div>
                       )}
+
+                      <div className="pt-4 border-t border-slate-700 space-y-3">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase">Audio Settings</h4>
+                        
+                        <div className="space-y-2">
+                          <label className="text-xs text-slate-400">Playback Speed: {settings.audioSettings?.speed ?? 1.0}x</label>
+                          <input 
+                            type="range" 
+                            min="0.5" 
+                            max="2.0" 
+                            step="0.1"
+                            value={settings.audioSettings?.speed ?? 1.0}
+                            onChange={(e) => updateAudioSpeed(parseFloat(e.target.value))}
+                            className="w-full accent-orange-500"
+                          />
+                          <div className="flex justify-between text-xs text-slate-500">
+                            <span>0.5x (Slow)</span>
+                            <span>1.0x</span>
+                            <span>2.0x (Fast)</span>
+                          </div>
+                        </div>
+                      </div>
 
                       <label className="flex items-center justify-between cursor-pointer group">
                         <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Auto Audio (Coming Soon)</span>
