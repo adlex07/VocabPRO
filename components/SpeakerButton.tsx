@@ -47,7 +47,7 @@ const SpeakerButton: React.FC<SpeakerButtonProps> = ({ text, settings, className
       // Reset playing state after speech ends
       // Since Web Speech API doesn't provide reliable end event, use timeout based on text length
       const estimatedDuration = (text.length / 15) * 1000 / audioSettings.speed; // rough estimate
-      timeoutRef.current = setTimeout(() => {
+      timeoutRef.current = window.setTimeout(() => {
         setIsPlaying(false);
       }, estimatedDuration);
     } catch (error) {

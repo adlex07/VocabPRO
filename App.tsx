@@ -222,10 +222,8 @@ const App: React.FC = () => {
       const newSettings = { 
         ...prev, 
         audioSettings: { 
-          ...prev.audioSettings,
-          speed,
-          voice: prev.audioSettings?.voice,
-          autoPlay: prev.audioSettings?.autoPlay ?? false
+          ...(prev.audioSettings || {}),
+          speed
         } 
       };
       saveSettings(newSettings);
