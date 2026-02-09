@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { speak, isSpeechSupported } from '../services/audioService';
 import { UserSettings } from '../types';
 
@@ -11,6 +11,16 @@ interface SpeakerButtonProps {
 
 const SpeakerButton: React.FC<SpeakerButtonProps> = ({ text, settings, className = '', size = 'md' }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   if (!isSpeechSupported()) {
     return null;
@@ -21,6 +31,9 @@ const SpeakerButton: React.FC<SpeakerButtonProps> = ({ text, settings, className
     
     if (isPlaying) {
       window.speechSynthesis.cancel();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       setIsPlaying(false);
       return;
     }
@@ -34,7 +47,7 @@ const SpeakerButton: React.FC<SpeakerButtonProps> = ({ text, settings, className
       // Reset playing state after speech ends
       // Since Web Speech API doesn't provide reliable end event, use timeout based on text length
       const estimatedDuration = (text.length / 15) * 1000 / audioSettings.speed; // rough estimate
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setIsPlaying(false);
       }, estimatedDuration);
     } catch (error) {
