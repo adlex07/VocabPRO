@@ -1,71 +1,222 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { WordData, ElaborationFeedback, QuickDefinitionResult } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Validate API key on module initialization
+const API_KEY = process.env.API_KEY;
+if (!API_KEY) {
+  console.error("GEMINI_API_KEY is not set. Please set it in your .env.local file.");
+}
+
+const ai = new GoogleGenAI({ apiKey: API_KEY || "" });
 const model = "gemini-3-flash-preview";
+
+// Configuration for retries and timeouts
+const RETRY_CONFIG = {
+  maxRetries: 3,
+  initialDelay: 1000, // 1 second
+  maxDelay: 10000, // 10 seconds
+  timeout: 30000, // 30 seconds per request
+};
+
+// Custom error types for better error handling
+export class APIError extends Error {
+  constructor(message: string, public code?: string, public retryable = false) {
+    super(message);
+    this.name = "APIError";
+  }
+}
+
+export class TimeoutError extends APIError {
+  constructor(message = "Request timed out") {
+    super(message, "TIMEOUT", true);
+    this.name = "TimeoutError";
+  }
+}
+
+export class NetworkError extends APIError {
+  constructor(message = "Network error occurred") {
+    super(message, "NETWORK", true);
+    this.name = "NetworkError";
+  }
+}
+
+export class ValidationError extends APIError {
+  constructor(message = "Invalid response format") {
+    super(message, "VALIDATION", false);
+    this.name = "ValidationError";
+  }
+}
+
+// Helper function to implement timeout for promises
+const withTimeout = <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new TimeoutError()), timeoutMs)
+    ),
+  ]);
+};
+
+// Helper function for exponential backoff retry logic
+const retry = async <T>(
+  fn: () => Promise<T>,
+  retries = RETRY_CONFIG.maxRetries,
+  delay = RETRY_CONFIG.initialDelay
+): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries === 0) {
+      throw error;
+    }
+
+    // Check if error is retryable
+    const isRetryable =
+      error instanceof TimeoutError ||
+      error instanceof NetworkError ||
+      (error instanceof APIError && error.retryable);
+
+    if (!isRetryable) {
+      throw error;
+    }
+
+    // Wait before retrying with exponential backoff
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    const nextDelay = Math.min(delay * 2, RETRY_CONFIG.maxDelay);
+    
+    console.log(`Retrying... (${RETRY_CONFIG.maxRetries - retries + 1}/${RETRY_CONFIG.maxRetries})`);
+    return retry(fn, retries - 1, nextDelay);
+  }
+};
+
+// Helper function to safely parse JSON response
+const parseJSONResponse = (text: string | undefined | null, stageName: string): any => {
+  if (!text || text.trim() === "") {
+    throw new APIError(`No response received for ${stageName}`, "EMPTY_RESPONSE", true);
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new ValidationError(`Invalid JSON response for ${stageName}: ${error.message}`);
+    }
+    throw error;
+  }
+};
+
+// Wrapper for API calls with error handling, timeout, and retry
+const apiCall = async <T>(
+  apiFunction: () => Promise<any>,
+  stageName: string
+): Promise<T> => {
+  return retry(async () => {
+    try {
+      const response = await withTimeout(
+        apiFunction(),
+        RETRY_CONFIG.timeout
+      );
+
+      // Parse and validate response
+      const text = response?.text;
+      return parseJSONResponse(text, stageName);
+    } catch (error) {
+      // Convert various error types to our custom errors
+      if (error instanceof TimeoutError || error instanceof ValidationError) {
+        throw error;
+      }
+
+      // Network-related errors
+      if (
+        error instanceof TypeError ||
+        (error as any)?.message?.includes("fetch") ||
+        (error as any)?.message?.includes("network")
+      ) {
+        throw new NetworkError(`Network error during ${stageName}: ${(error as Error).message}`);
+      }
+
+      // API-specific errors
+      if ((error as any)?.status) {
+        const status = (error as any).status;
+        const retryable = status === 429 || status >= 500;
+        throw new APIError(
+          `API error (${status}) during ${stageName}: ${(error as Error).message}`,
+          `HTTP_${status}`,
+          retryable
+        );
+      }
+
+      // Unknown errors
+      throw new APIError(
+        `Unexpected error during ${stageName}: ${(error as Error).message}`,
+        "UNKNOWN",
+        false
+      );
+    }
+  });
+};
 
 // Stage 1: Core Essentials
 export const fetchWordStage1 = async (word: string): Promise<Partial<WordData>> => {
-  const response = await ai.models.generateContent({
-    model,
-    contents: `You are an expert tutor. Define the word "${word}".
-    Return JSON with:
-    - simpleDefinition: Clear, easy to understand.
-    - preciseDefinition: Academic/formal definition.
-    - pronunciation: IPA or phonetic.
-    - partOfSpeech: e.g., Noun, Verb.`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          word: { type: Type.STRING },
-          simpleDefinition: { type: Type.STRING },
-          preciseDefinition: { type: Type.STRING },
-          pronunciation: { type: Type.STRING },
-          partOfSpeech: { type: Type.STRING },
-        },
-        required: ["word", "simpleDefinition", "preciseDefinition", "pronunciation", "partOfSpeech"]
+  return apiCall<Partial<WordData>>(
+    () => ai.models.generateContent({
+      model,
+      contents: `You are an expert tutor. Define the word "${word}".
+      Return JSON with:
+      - simpleDefinition: Clear, easy to understand.
+      - preciseDefinition: Academic/formal definition.
+      - pronunciation: IPA or phonetic.
+      - partOfSpeech: e.g., Noun, Verb.`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            word: { type: Type.STRING },
+            simpleDefinition: { type: Type.STRING },
+            preciseDefinition: { type: Type.STRING },
+            pronunciation: { type: Type.STRING },
+            partOfSpeech: { type: Type.STRING },
+          },
+          required: ["word", "simpleDefinition", "preciseDefinition", "pronunciation", "partOfSpeech"]
+        }
       }
-    }
-  });
-
-  const text = response.text;
-  if (!text) throw new Error("No response for Stage 1");
-  return JSON.parse(text);
+    }),
+    "Stage 1"
+  );
 };
 
 // Stage 2: Context & Examples
 export const fetchWordStage2 = async (word: string): Promise<Partial<WordData>> => {
-  const response = await ai.models.generateContent({
-    model,
-    contents: `For the word "${word}", provide context.
-    Return JSON with:
-    - examples: 3 diverse sentences.
-    - wordFamily: 3-5 related forms (e.g., noun, verb, adj versions).`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          examples: { type: Type.ARRAY, items: { type: Type.STRING } },
-          wordFamily: { type: Type.ARRAY, items: { type: Type.STRING } },
-        },
-        required: ["examples", "wordFamily"]
+  return apiCall<Partial<WordData>>(
+    () => ai.models.generateContent({
+      model,
+      contents: `For the word "${word}", provide context.
+      Return JSON with:
+      - examples: 3 diverse sentences.
+      - wordFamily: 3-5 related forms (e.g., noun, verb, adj versions).`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            examples: { type: Type.ARRAY, items: { type: Type.STRING } },
+            wordFamily: { type: Type.ARRAY, items: { type: Type.STRING } },
+          },
+          required: ["examples", "wordFamily"]
+        }
       }
-    }
-  });
-
-  const text = response.text;
-  if (!text) throw new Error("No response for Stage 2");
-  return JSON.parse(text);
+    }),
+    "Stage 2"
+  );
 };
 
 // Stage 3: Deep Learning & Quiz
 export const fetchWordStage3 = async (word: string): Promise<Partial<WordData>> => {
-  const response = await ai.models.generateContent({
-    model,
-    contents: `For the word "${word}", provide DEEP LEARNING content and QUIZ.
+  return apiCall<Partial<WordData>>(
+    () => ai.models.generateContent({
+      model,
+      contents: `For the word "${word}", provide DEEP LEARNING content and QUIZ.
 
     DEEP LEARNING:
     - conceptOrigin: Etymology/history.
@@ -90,78 +241,76 @@ export const fetchWordStage3 = async (word: string): Promise<Partial<WordData>> 
     - recallQuestion: A definition-style clue that requires producing "${word}" from memory. Do NOT include the word itself in the clue.
     - recallAnswer: The target word.
     `,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          deepLearning: {
-            type: Type.OBJECT,
-            properties: {
-              conceptOrigin: { type: Type.STRING },
-              comparisons: {
-                type: Type.ARRAY,
-                items: { type: Type.OBJECT, properties: { word: { type: Type.STRING }, difference: { type: Type.STRING } } }
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            deepLearning: {
+              type: Type.OBJECT,
+              properties: {
+                conceptOrigin: { type: Type.STRING },
+                comparisons: {
+                  type: Type.ARRAY,
+                  items: { type: Type.OBJECT, properties: { word: { type: Type.STRING }, difference: { type: Type.STRING } } }
+                },
+                analogy: { type: Type.STRING },
+                mentalImage: { type: Type.STRING },
+                memoryStory: { type: Type.STRING },
+                mnemonic: { type: Type.STRING },
+                associationPrompt: { type: Type.STRING },
+                etymology: {
+                  type: Type.ARRAY,
+                  items: { type: Type.OBJECT, properties: { part: { type: Type.STRING }, meaning: { type: Type.STRING } } }
+                },
+                synonyms: {
+                  type: Type.ARRAY,
+                  items: { type: Type.OBJECT, properties: { word: { type: Type.STRING }, nuance: { type: Type.STRING } } }
+                },
+                antonyms: { type: Type.ARRAY, items: { type: Type.STRING } },
+                relatedWords: { type: Type.ARRAY, items: { type: Type.STRING } },
+                arabicAssociations: { type: Type.ARRAY, items: { type: Type.STRING } }
               },
-              analogy: { type: Type.STRING },
-              mentalImage: { type: Type.STRING },
-              memoryStory: { type: Type.STRING },
-              mnemonic: { type: Type.STRING },
-              associationPrompt: { type: Type.STRING },
-              etymology: {
-                type: Type.ARRAY,
-                items: { type: Type.OBJECT, properties: { part: { type: Type.STRING }, meaning: { type: Type.STRING } } }
-              },
-              synonyms: {
-                type: Type.ARRAY,
-                items: { type: Type.OBJECT, properties: { word: { type: Type.STRING }, nuance: { type: Type.STRING } } }
-              },
-              antonyms: { type: Type.ARRAY, items: { type: Type.STRING } },
-              relatedWords: { type: Type.ARRAY, items: { type: Type.STRING } },
-              arabicAssociations: { type: Type.ARRAY, items: { type: Type.STRING } }
+              required: ["conceptOrigin", "comparisons", "analogy", "mentalImage", "memoryStory", "mnemonic", "associationPrompt", "etymology", "synonyms", "antonyms", "relatedWords"]
             },
-            required: ["conceptOrigin", "comparisons", "analogy", "mentalImage", "memoryStory", "mnemonic", "associationPrompt", "etymology", "synonyms", "antonyms", "relatedWords"]
+            quiz: {
+              type: Type.OBJECT,
+              properties: {
+                fillInBlankQuestion: { type: Type.STRING },
+                fillInBlankAnswer: { type: Type.STRING },
+                recallQuestion: { type: Type.STRING },
+                recallAnswer: { type: Type.STRING },
+                multipleChoiceOptions: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: { text: { type: Type.STRING }, isCorrect: { type: Type.BOOLEAN } }
+                  }
+                },
+                nearMeaningDistractors: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: { word: { type: Type.STRING }, definition: { type: Type.STRING } }
+                  }
+                },
+                errorSpotting: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: { sentence: { type: Type.STRING }, isCorrect: { type: Type.BOOLEAN }, explanation: { type: Type.STRING } }
+                  }
+                }
+              },
+              required: ["fillInBlankQuestion", "fillInBlankAnswer", "recallQuestion", "recallAnswer", "multipleChoiceOptions", "nearMeaningDistractors", "errorSpotting"]
+            }
           },
-          quiz: {
-            type: Type.OBJECT,
-            properties: {
-              fillInBlankQuestion: { type: Type.STRING },
-              fillInBlankAnswer: { type: Type.STRING },
-              recallQuestion: { type: Type.STRING },
-              recallAnswer: { type: Type.STRING },
-              multipleChoiceOptions: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: { text: { type: Type.STRING }, isCorrect: { type: Type.BOOLEAN } }
-                }
-              },
-              nearMeaningDistractors: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: { word: { type: Type.STRING }, definition: { type: Type.STRING } }
-                }
-              },
-              errorSpotting: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: { sentence: { type: Type.STRING }, isCorrect: { type: Type.BOOLEAN }, explanation: { type: Type.STRING } }
-                }
-              }
-            },
-            required: ["fillInBlankQuestion", "fillInBlankAnswer", "recallQuestion", "recallAnswer", "multipleChoiceOptions", "nearMeaningDistractors", "errorSpotting"]
-          }
-        },
-        required: ["deepLearning", "quiz"]
+          required: ["deepLearning", "quiz"]
+        }
       }
-    }
-  });
-
-  const text = response.text;
-  if (!text) throw new Error("No response for Stage 3");
-  return JSON.parse(text);
+    }),
+    "Stage 3"
+  );
 };
 
 // Deprecated single-call function (kept for reference or fallback if needed, but not used in new flow)
@@ -174,9 +323,10 @@ export const lookupWord = async (word: string): Promise<WordData> => {
 };
 
 export const checkElaboration = async (word: string, userDefinition: string, userSentence: string): Promise<ElaborationFeedback> => {
-  const response = await ai.models.generateContent({
-    model,
-    contents: `Act as a supportive but strict vocabulary tutor. Evaluate the user's understanding of the word "${word}".
+  return apiCall<ElaborationFeedback>(
+    () => ai.models.generateContent({
+      model,
+      contents: `Act as a supportive but strict vocabulary tutor. Evaluate the user's understanding of the word "${word}".
     
     User's Definition: "${userDefinition}"
     User's Sentence: "${userSentence}"
@@ -188,45 +338,43 @@ export const checkElaboration = async (word: string, userDefinition: string, use
     - generalFeedback: A summarizing comment.
     
     Return JSON.`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          isCorrect: { type: Type.BOOLEAN },
-          generalFeedback: { type: Type.STRING },
-          definitionScore: { type: Type.INTEGER },
-          sentenceScore: { type: Type.INTEGER },
-          definitionFeedback: { type: Type.STRING },
-          sentenceFeedback: { type: Type.STRING }
-        },
-        required: ["isCorrect", "generalFeedback", "definitionScore", "sentenceScore", "definitionFeedback", "sentenceFeedback"]
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            isCorrect: { type: Type.BOOLEAN },
+            generalFeedback: { type: Type.STRING },
+            definitionScore: { type: Type.INTEGER },
+            sentenceScore: { type: Type.INTEGER },
+            definitionFeedback: { type: Type.STRING },
+            sentenceFeedback: { type: Type.STRING }
+          },
+          required: ["isCorrect", "generalFeedback", "definitionScore", "sentenceScore", "definitionFeedback", "sentenceFeedback"]
+        }
       }
-    }
-  });
-  const text = response.text;
-  if (!text) throw new Error("No response.");
-  return JSON.parse(text) as ElaborationFeedback;
+    }),
+    "Elaboration Check"
+  );
 };
 
 export const getQuickDefinition = async (word: string): Promise<QuickDefinitionResult> => {
-  const response = await ai.models.generateContent({
-    model,
-    contents: `Define "${word}" in 12 words or less. Simple and direct.`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          word: { type: Type.STRING },
-          definition: { type: Type.STRING },
-        },
-        required: ["word", "definition"]
+  return apiCall<QuickDefinitionResult>(
+    () => ai.models.generateContent({
+      model,
+      contents: `Define "${word}" in 12 words or less. Simple and direct.`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            word: { type: Type.STRING },
+            definition: { type: Type.STRING },
+          },
+          required: ["word", "definition"]
+        }
       }
-    }
-  });
-
-  const text = response.text;
-  if (!text) throw new Error("No response");
-  return JSON.parse(text) as QuickDefinitionResult;
+    }),
+    "Quick Definition"
+  );
 };

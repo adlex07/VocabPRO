@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { WordData, UserSettings } from './types';
-import { fetchWordStage1, fetchWordStage2, fetchWordStage3, getQuickDefinition } from './services/geminiService';
+import { 
+  fetchWordStage1, 
+  fetchWordStage2, 
+  fetchWordStage3, 
+  getQuickDefinition,
+  APIError,
+  TimeoutError,
+  NetworkError,
+  ValidationError
+} from './services/geminiService';
 import { saveWordToHistory } from './services/storageService';
 import { migrateFromLocalStorage } from './services/db';
 import Dashboard from './components/dashboard/Dashboard';
@@ -99,10 +108,13 @@ const App: React.FC = () => {
     setQuickDef(null);
     setIsSearchModalOpen(false); // Close modal if open
 
+    let stage1Data: Partial<WordData> | null = null;
+    let stage2Data: Partial<WordData> | null = null;
+
     try {
       // Stage 1: Core Essentials
-      const stage1 = await fetchWordStage1(targetWord);
-      setWordData(prev => ({ ...prev, ...stage1 }));
+      stage1Data = await fetchWordStage1(targetWord);
+      setWordData(prev => ({ ...prev, ...stage1Data }));
       setLoadingStage(2);
 
       // Add to lookup history for highlighting
@@ -112,8 +124,8 @@ const App: React.FC = () => {
       }));
 
       // Stage 2: Context
-      const stage2 = await fetchWordStage2(targetWord);
-      setWordData(prev => ({ ...prev, ...stage2 }));
+      stage2Data = await fetchWordStage2(targetWord);
+      setWordData(prev => ({ ...prev, ...stage2Data }));
       setLoadingStage(3);
 
       // Stage 3: Deep Learning
@@ -122,8 +134,8 @@ const App: React.FC = () => {
       const completeData = {
         word: targetWord,
         mastery: 0,
-        ...stage1,
-        ...stage2,
+        ...stage1Data,
+        ...stage2Data,
         ...stage3
       } as WordData;
 
@@ -133,17 +145,56 @@ const App: React.FC = () => {
       setLoadingStage(4);
 
     } catch (err) {
-      console.error(err);
-      // Determine error message based on stage
-      let msg = "I couldn't find that word. Please check spelling.";
-      if (loadingStage >= 2) {
-         msg = "I loaded the basics, but couldn't get the deeper details right now.";
-         // We might want to save what we have if stage 2 completed
-         setLoadingStage(4); // Stop loading spinner essentially
+      console.error('API Error:', err);
+      
+      // Determine error message based on error type and stage
+      let msg = "An error occurred while loading the word.";
+      let shouldSavePartial = false;
+
+      if (err instanceof TimeoutError) {
+        msg = "The request timed out. Please check your internet connection and try again.";
+      } else if (err instanceof NetworkError) {
+        msg = "Network error. Please check your internet connection and try again.";
+      } else if (err instanceof ValidationError) {
+        msg = "Received an invalid response. Please try again.";
+      } else if (err instanceof APIError) {
+        if (err.code === 'HTTP_429') {
+          msg = "Rate limit exceeded. Please wait a moment and try again.";
+        } else if (err.code?.startsWith('HTTP_5')) {
+          msg = "The API service is temporarily unavailable. Please try again later.";
+        } else {
+          msg = err.message || "An API error occurred. Please try again.";
+        }
       } else {
-         setError(msg);
-         setWordData(null);
-         setLoadingStage(0);
+        // Generic error
+        msg = "I couldn't find that word. Please check the spelling and try again.";
+      }
+
+      // If we successfully got stage 1 or stage 2 data, save it
+      if (loadingStage >= 2 && stage1Data) {
+        shouldSavePartial = true;
+        msg += " Some basic information was loaded successfully.";
+        
+        const partialData = {
+          word: targetWord,
+          mastery: 0,
+          ...stage1Data,
+          ...(stage2Data || {})
+        } as WordData;
+        
+        setWordData(partialData);
+        saveWordToHistory(partialData).catch(console.error);
+        setLoadingStage(4); // Mark as complete to stop loading spinner
+      } else {
+        // Complete failure
+        setError(msg);
+        setWordData(null);
+        setLoadingStage(0);
+      }
+
+      // Show error message if partial data wasn't saved
+      if (!shouldSavePartial) {
+        setError(msg);
       }
     }
   };
@@ -160,7 +211,21 @@ const App: React.FC = () => {
        const res = await getQuickDefinition(word);
        setQuickDef(prev => prev && prev.word === word ? { ...prev, definition: res.definition, loading: false } : prev);
      } catch (e) {
-       setQuickDef(null);
+       console.error('Quick definition error:', e);
+       // Show error state instead of just closing
+       setQuickDef(prev => {
+         if (prev && prev.word === word) {
+           return {
+             ...prev,
+             definition: "Unable to load definition. Please try again.",
+             loading: false
+           };
+         }
+         return prev;
+       });
+       
+       // Auto-close after showing error message
+       setTimeout(() => setQuickDef(null), 3000);
      }
   };
 
