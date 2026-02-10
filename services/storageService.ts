@@ -145,3 +145,97 @@ export const updateQuizHistory = async (word: string, quizHistory: QuizPerforman
     console.error("Failed to update quiz history", error);
   }
 };
+
+// Export/Import functionality
+export interface ExportData {
+  version: string;
+  exportDate: string;
+  words: WordData[];
+  settings: UserSettings;
+}
+
+export const exportUserData = async (): Promise<string> => {
+  try {
+    const words = await db.words.toArray();
+    const settings = await loadSettings();
+    
+    const exportData: ExportData = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      words,
+      settings
+    };
+    
+    return JSON.stringify(exportData, null, 2);
+  } catch (error) {
+    console.error("Failed to export data", error);
+    throw error;
+  }
+};
+
+export const downloadExportedData = async (): Promise<void> => {
+  try {
+    const jsonData = await exportUserData();
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `deepvocab-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Failed to download data", error);
+    throw error;
+  }
+};
+
+export const importUserData = async (jsonData: string, mode: 'merge' | 'replace' = 'merge'): Promise<{ imported: number; skipped: number }> => {
+  try {
+    const data: ExportData = JSON.parse(jsonData);
+    
+    // Validate data structure
+    if (!data.words || !Array.isArray(data.words)) {
+      throw new Error('Invalid backup file format');
+    }
+    
+    let imported = 0;
+    let skipped = 0;
+    
+    if (mode === 'replace') {
+      // Clear existing data
+      await db.words.clear();
+    }
+    
+    // Import words
+    for (const word of data.words) {
+      try {
+        const existing = await db.words.where('word').equalsIgnoreCase(word.word).first();
+        
+        if (existing && mode === 'merge') {
+          // In merge mode, keep existing word (don't overwrite)
+          skipped++;
+        } else {
+          // Remove id to let IndexedDB assign new one
+          const { id, ...wordWithoutId } = word;
+          await db.words.add(wordWithoutId);
+          imported++;
+        }
+      } catch (err) {
+        console.warn(`Failed to import word: ${word.word}`, err);
+        skipped++;
+      }
+    }
+    
+    // Import settings if available
+    if (data.settings) {
+      await saveSettings(data.settings);
+    }
+    
+    return { imported, skipped };
+  } catch (error) {
+    console.error("Failed to import data", error);
+    throw error;
+  }
+};
