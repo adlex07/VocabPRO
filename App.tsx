@@ -18,6 +18,7 @@ import ReviewSchedule from './components/ReviewSchedule';
 import StudyTab from './components/StudyTab';
 import ContextualImageSearch from './components/ContextualImageSearch';
 import QuickDefinition from './components/QuickDefinition';
+import ConnectionStatus from './components/ConnectionStatus';
 import { SearchIcon, GraduationCapIcon, SettingsIcon, BookOpenIcon, XIcon, LayoutGridIcon } from './components/Icons';
 
 type Tab = 'search' | 'study' | 'dashboard';
@@ -256,6 +257,13 @@ const App: React.FC = () => {
     <div className="min-h-screen text-slate-100 pb-20 selection:bg-orange-500 selection:text-white">
       {/* Visual Overlays */}
       <ContextualImageSearch />
+      
+      {/* Connection Status Monitor */}
+      <ConnectionStatus 
+        isLoading={loadingStage > 0 && loadingStage < 4}
+        error={error}
+        stage={loadingStage}
+      />
       
       {quickDef && (
         <QuickDefinition 
