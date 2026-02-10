@@ -22,22 +22,22 @@ const ExpandableSection = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className={`border rounded-xl overflow-hidden transition-all duration-300 ${isOpen ? 'shadow-md' : 'shadow-sm'} bg-white mb-4`}>
+    <div className={`border rounded-2xl overflow-hidden transition-all duration-300 ${isOpen ? 'shadow-lg' : 'shadow-sm'} bg-white mb-4 hover:shadow-xl`}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between p-4 ${colorClass} bg-opacity-10 hover:bg-opacity-20 transition-colors`}
+        className={`w-full flex items-center justify-between p-5 ${colorClass} bg-opacity-10 hover:bg-opacity-20 transition-all`}
       >
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${colorClass} bg-opacity-20 text-current`}>
+          <div className={`p-2.5 rounded-xl ${colorClass} bg-opacity-20 text-current shadow-sm`}>
             <Icon className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-slate-800 heading-font">{title}</h3>
+          <h3 className="font-bold text-slate-800 heading-font text-lg">{title}</h3>
         </div>
         <ChevronDownIcon className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       
       {isOpen && (
-        <div className="p-5 animate-fade-in border-t border-slate-100">
+        <div className="p-6 animate-fade-in border-t border-slate-100">
           {children}
         </div>
       )}

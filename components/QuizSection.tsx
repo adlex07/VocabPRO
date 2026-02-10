@@ -337,7 +337,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({ data }) => {
              else handleFailure();
            }}
            disabled={feedback === 'correct'}
-           className="bg-indigo-600 text-white px-6 rounded-lg font-bold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+           className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Check
         </button>
@@ -446,7 +446,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({ data }) => {
              else handleFailure();
            }}
            disabled={feedback === 'correct'}
-           className="bg-indigo-600 text-white px-6 rounded-lg font-bold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+           className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Check
         </button>

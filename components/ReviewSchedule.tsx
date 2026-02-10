@@ -10,12 +10,12 @@ interface ReviewScheduleProps {
 const ReviewSchedule: React.FC<ReviewScheduleProps> = ({ data }) => {
   if (!data?.fsrs) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+      <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200 p-6 hover:shadow-xl transition-shadow">
          <div className="flex items-center gap-2 mb-4 text-slate-800">
-            <ClockIcon className="w-5 h-5 text-indigo-500" />
+            <ClockIcon className="w-5 h-5 text-orange-500" />
             <h3 className="font-semibold text-lg heading-font">FSRS Memory Engine</h3>
          </div>
-         <p className="text-slate-500 text-sm">
+         <p className="text-slate-600 text-sm font-medium">
            Take a quiz to start the FSRS memory tracking engine for this word.
          </p>
       </div>
