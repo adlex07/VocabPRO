@@ -221,9 +221,12 @@ export const importUserData = async (jsonData: string, mode: 'merge' | 'replace'
           // In merge mode, keep existing word (don't overwrite)
           skipped++;
         } else {
-          // Remove id to let IndexedDB assign new one
-          const { id, ...wordWithoutId } = word;
-          await db.words.add(wordWithoutId);
+          // Remove id to let IndexedDB assign new one (create clean copy without id)
+          const wordToAdd = { ...word };
+          if ('id' in wordToAdd) {
+            delete wordToAdd.id;
+          }
+          await db.words.add(wordToAdd);
           imported++;
         }
       } catch (err) {
