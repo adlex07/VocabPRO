@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { WordData, QuizMode } from '../types';
 import { BrainIcon, CheckIcon, TargetIcon, LightningIcon, LightbulbIcon } from './Icons';
-import { updateWordMastery, updateWordFSRS, updateQuizHistory } from '../services/storageService';
+import { updateWordMastery, updateWordFSRS, updateQuizHistory, updateStreak } from '../services/storageService';
 import { calculateFSRS, Rating } from '../services/fsrsService';
 import {
   selectQuizMode,
@@ -104,6 +104,11 @@ const QuizSection: React.FC<QuizSectionProps> = ({ data }) => {
     // Also update generic mastery bar
     const masteryDelta = isCorrect ? (mode === 'recall' ? 20 : mode === 'error' ? 15 : 10) : -10;
     await updateWordMastery(data.word, masteryDelta);
+
+    // Update streak when user completes a quiz (successful review)
+    if (isCorrect) {
+      await updateStreak();
+    }
 
     // Auto-advance to next mode on success if in auto mode
     if (isCorrect && autoMode) {

@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import { WordData, QuizPerformance } from '../types';
+import { WordData, QuizPerformance, UserSettings } from '../types';
 import { convertSM2ToFSRS } from './migrationService';
 
 export function createEmptyQuizPerformance(): QuizPerformance {
@@ -25,9 +25,16 @@ export interface AppLog {
   details: string;
 }
 
+export interface SettingsRecord {
+  id?: number;
+  key: string;
+  value: string;
+}
+
 export class DeepVocabDB extends Dexie {
   words!: Table<WordData, number>;
   logs!: Table<AppLog, number>;
+  settings!: Table<SettingsRecord, number>;
 
   constructor() {
     super('DeepVocabDB');
@@ -76,6 +83,13 @@ export class DeepVocabDB extends Dexie {
       }
 
       console.log(`[Quiz History Migration] Initialized ${migrated}/${allWords.length} words.`);
+    });
+
+    // v4: Add settings table for persistent user preferences
+    this.version(4).stores({
+      words: '++id, &word, mastery, srs.nextReview, fsrs.due',
+      logs: '++id, timestamp, action',
+      settings: '++id, &key'
     });
   }
 }

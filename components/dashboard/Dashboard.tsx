@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../services/db';
 import { WordData } from '../../types';
 import { SearchIcon, TrashIcon, EyeIcon } from '../Icons';
+import { downloadExportedData, importUserData } from '../../services/storageService';
 
 const StatCard = ({ title, value, sub, color }: any) => (
   <div className="bg-[#1A1A1E] border border-white/5 p-4 rounded-xl">
@@ -18,6 +19,9 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ onViewWord }) => {
   const [search, setSearch] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const words = useLiveQuery(
     () => db.words.toArray()
@@ -26,6 +30,51 @@ export const Dashboard: React.FC<DashboardProps> = ({ onViewWord }) => {
   const handleDelete = async (id: number) => {
     if (confirm('Are you sure you want to delete this word?')) {
       await db.words.delete(id);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      await downloadExportedData();
+    } catch (error) {
+      alert('Failed to export data. Please try again.');
+      console.error(error);
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    setImportMessage(null);
+
+    try {
+      const text = await file.text();
+      const mode = confirm('Merge with existing data? (Cancel = Replace all data)') ? 'merge' : 'replace';
+      
+      const result = await importUserData(text, mode);
+      setImportMessage({
+        type: 'success',
+        text: `Successfully imported ${result.imported} words. ${result.skipped} skipped.`
+      });
+      
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      setImportMessage({
+        type: 'error',
+        text: 'Failed to import data. Please check the file format.'
+      });
+      console.error(error);
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -43,12 +92,38 @@ export const Dashboard: React.FC<DashboardProps> = ({ onViewWord }) => {
 
   return (
     <div className="animate-fade-in space-y-6 pb-20">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <h1 className="text-2xl font-bold text-white">Data Manager</h1>
         <div className="flex gap-2">
-           {/* Actions like Export/Import could go here */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleFileSelected}
+            className="hidden"
+          />
+          <button
+            onClick={handleImportClick}
+            disabled={importing}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {importing ? 'Importing...' : '📥 Import Data'}
+          </button>
+          <button
+            onClick={handleExport}
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            📤 Export Data
+          </button>
         </div>
       </div>
+
+      {/* Import Message */}
+      {importMessage && (
+        <div className={`p-4 rounded-lg ${importMessage.type === 'success' ? 'bg-green-500/10 border border-green-500/20 text-green-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
+          {importMessage.text}
+        </div>
+      )}
 
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

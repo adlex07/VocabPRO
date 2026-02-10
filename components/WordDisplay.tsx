@@ -6,6 +6,8 @@ import ElaborationSection from './ElaborationSection';
 import ArabicAssociations from './ArabicAssociations';
 import InteractiveText from './InteractiveText';
 import ReviewSchedule from './ReviewSchedule';
+import VisualLearning from './VisualLearning';
+import SpeakerButton from './SpeakerButton';
 
 interface WordDisplayProps {
   data: Partial<WordData>;
@@ -13,6 +15,7 @@ interface WordDisplayProps {
   loadingStage: number; // 0=idle, 1=core, 2=context, 3=deep, 4=done
   onWordClick: (word: string, rect: DOMRect) => void;
   onWordDoubleClick: (word: string) => void;
+  onRelatedWordClick?: (word: string) => void;
 }
 
 const SkeletonLine = ({ className }: { className?: string }) => (
@@ -31,7 +34,8 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
   settings, 
   loadingStage,
   onWordClick, 
-  onWordDoubleClick 
+  onWordDoubleClick,
+  onRelatedWordClick
 }) => {
   const mastery = data.mastery || 0;
   
@@ -64,9 +68,12 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
         {/* Header */}
         <div className="bg-slate-50 p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-baseline gap-4 justify-between">
           <div className="flex flex-col md:flex-row md:items-baseline gap-4 w-full">
-             <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-               {data.word || <SkeletonLine className="w-48 h-10" />}
-             </h1>
+             <div className="flex items-center gap-2">
+               <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
+                 {data.word || <SkeletonLine className="w-48 h-10" />}
+               </h1>
+               {data.word && <SpeakerButton text={data.word} settings={settings} size="lg" />}
+             </div>
              
              {loadingStage >= 2 || data.pronunciation ? (
                <div className="flex items-center gap-3 text-slate-500 animate-fade-in">
@@ -91,8 +98,13 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
             <div className="space-y-2">
               <h3 className="text-sm uppercase tracking-wider font-semibold text-slate-400">Simple Definition</h3>
               {data.simpleDefinition ? (
-                <div className="text-lg text-slate-800 leading-relaxed font-medium animate-fade-in">
-                  {interact(data.simpleDefinition)}
+                <div className="animate-fade-in">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1 text-lg text-slate-800 leading-relaxed font-medium">
+                      {interact(data.simpleDefinition)}
+                    </div>
+                    <SpeakerButton text={data.simpleDefinition} settings={settings} size="sm" />
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -104,8 +116,13 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
             <div className="space-y-2">
               <h3 className="text-sm uppercase tracking-wider font-semibold text-slate-400">Precise Definition</h3>
                {data.preciseDefinition ? (
-                <div className="text-lg text-slate-600 leading-relaxed font-serif animate-fade-in">
-                  {interact(data.preciseDefinition)}
+                <div className="animate-fade-in">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1 text-lg text-slate-600 leading-relaxed font-serif">
+                      {interact(data.preciseDefinition)}
+                    </div>
+                    <SpeakerButton text={data.preciseDefinition} settings={settings} size="sm" />
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -129,7 +146,8 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
                   {data.examples.map((ex, idx) => (
                     <li key={idx} className="flex gap-3 text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
                       <span className="text-indigo-400 font-bold select-none">{idx + 1}.</span>
-                      <span>{interact(ex)}</span>
+                      <span className="flex-1">{interact(ex)}</span>
+                      <SpeakerButton text={ex} settings={settings} size="sm" />
                     </li>
                   ))}
                 </ul>
@@ -159,11 +177,14 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
           </div>
       ) : data.deepLearning ? (
          <div className="animate-fade-in">
+            {/* Visual Learning */}
+            {data.word && <VisualLearning data={data as WordData} settings={{ showVisuals: settings.showVisuals ?? false }} />}
+
             {/* Arabic Associations */}
             {data.word && <ArabicAssociations data={data as WordData} />}
 
             {/* Deep Learning Modules */}
-            {data.word && <DeepLearning data={data as WordData} />}
+            {data.word && <DeepLearning data={data as WordData} onRelatedWordClick={onRelatedWordClick} />}
          </div>
       ) : null}
 
