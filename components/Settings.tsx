@@ -55,7 +55,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onClose
           
           <div className="space-y-2">
             {/* Gemini Option */}
-            <label className="flex items-center p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-750 transition-colors border border-slate-700 hover:border-orange-500/50">
+            <label className="flex items-center p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors border border-slate-700 hover:border-orange-500/50">
               <input
                 type="radio"
                 name="llmProvider"
@@ -76,7 +76,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onClose
             </label>
 
             {/* Cerebras Option */}
-            <label className="flex items-center p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-750 transition-colors border border-slate-700 hover:border-orange-500/50">
+            <label className="flex items-center p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors border border-slate-700 hover:border-orange-500/50">
               <input
                 type="radio"
                 name="llmProvider"
@@ -101,7 +101,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onClose
           {!showApiKeyInput ? (
             <button
               onClick={() => setShowApiKeyInput(true)}
-              className="w-full mt-3 px-4 py-2 bg-slate-800 hover:bg-slate-750 text-white text-sm rounded-lg transition-colors border border-slate-700"
+              className="w-full mt-3 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-lg transition-colors border border-slate-700"
             >
               Configure API Keys
             </button>
@@ -164,7 +164,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onClose
         <div className="space-y-3 pt-4 border-t border-slate-700">
           <h4 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Display</h4>
           
-          <label className="flex items-center justify-between p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-750 transition-colors group">
+          <label className="flex items-center justify-between p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors group">
             <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Show Mnemonics</span>
             <input 
               type="checkbox" 
@@ -174,7 +174,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onClose
             />
           </label>
 
-          <label className="flex items-center justify-between p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-750 transition-colors group">
+          <label className="flex items-center justify-between p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors group">
             <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Auto Audio</span>
             <input 
               type="checkbox" 
@@ -185,7 +185,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange, onClose
           </label>
 
           {settings.showVisuals !== undefined && (
-            <label className="flex items-center justify-between p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-750 transition-colors group">
+            <label className="flex items-center justify-between p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors group">
               <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Show Visuals</span>
               <input 
                 type="checkbox" 
