@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { WordData } from '../types';
-import { getWordHistory } from '../services/storageService';
+import { WordData, UserStreak } from '../types';
+import { getWordHistory, loadStreak } from '../services/storageService';
 import QuizSection from './QuizSection';
 import ReviewSchedule from './ReviewSchedule';
+import StreakTracker from './StreakTracker';
 import { BookOpenIcon, SearchIcon, ChevronDownIcon, ClockIcon, CheckIcon } from './Icons';
 import { isFSRSDue, getFSRSStage, getRetrievability } from '../services/fsrsService';
 
@@ -59,10 +60,12 @@ const WordCard: React.FC<WordCardProps> = ({ wordData, isDueItem, onClick }) => 
 const StudyTab: React.FC = () => {
   const [history, setHistory] = useState<WordData[]>([]);
   const [selectedWord, setSelectedWord] = useState<WordData | null>(null);
+  const [streak, setStreak] = useState<UserStreak | null>(null);
 
   useEffect(() => {
     // Refresh history every time tab is mounted
     getWordHistory().then(setHistory);
+    loadStreak().then(setStreak);
   }, [selectedWord]); // Refresh when coming back from a word view too
 
   const dueWords = history.filter(w => isFSRSDue(w.fsrs));
@@ -126,11 +129,28 @@ const StudyTab: React.FC = () => {
         </span>
       </div>
 
+      {/* Streak Tracker */}
+      {streak && (
+        <div className="mb-8">
+          <StreakTracker streak={streak} />
+        </div>
+      )}
+
       {dueWords.length > 0 && (
         <div className="mb-10">
-          <div className="flex items-center gap-2 mb-4">
-             <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
-             <h3 className="text-lg font-bold text-orange-100 uppercase tracking-wider">Due for Review ({dueWords.length})</h3>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+              <h3 className="text-lg font-bold text-orange-100 uppercase tracking-wider">Due for Review ({dueWords.length})</h3>
+            </div>
+            {dueWords.length > 1 && (
+              <button
+                onClick={() => setSelectedWord(dueWords[0])}
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg"
+              >
+                🎯 Start Session
+              </button>
+            )}
           </div>
           <div className="grid gap-4 md:grid-cols-2">
              {dueWords.map((w, idx) => <WordCard key={idx} wordData={w} isDueItem={true} onClick={setSelectedWord} />)}

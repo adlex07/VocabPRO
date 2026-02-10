@@ -1,4 +1,4 @@
-import { WordData, QuizPerformance, UserSettings } from "../types";
+import { WordData, QuizPerformance, UserSettings, UserStreak } from "../types";
 import { db, createEmptyQuizPerformance } from "./db";
 import { createInitialFSRS, type FSRSData } from "./fsrsService";
 
@@ -16,6 +16,10 @@ export const getDefaultSettings = (): UserSettings => ({
     speed: 1.0,
     voice: undefined,
     autoPlay: false
+  },
+  dailyGoal: {
+    reviews: 15,
+    newWords: 3
   }
 });
 
@@ -238,4 +242,81 @@ export const importUserData = async (jsonData: string, mode: 'merge' | 'replace'
     console.error("Failed to import data", error);
     throw error;
   }
+};
+
+// Streak tracking functions
+export const getDefaultStreak = (): UserStreak => ({
+  currentStreak: 0,
+  longestStreak: 0,
+  lastStudyDate: '',
+  calendar: {},
+  totalStudyDays: 0
+});
+
+export const loadStreak = async (): Promise<UserStreak> => {
+  try {
+    const record = await db.settings.where('key').equals('userStreak').first();
+    if (record && record.value) {
+      return JSON.parse(record.value) as UserStreak;
+    }
+  } catch (error) {
+    console.error("Failed to load streak", error);
+  }
+  return getDefaultStreak();
+};
+
+export const saveStreak = async (streak: UserStreak): Promise<void> => {
+  try {
+    const streakJson = JSON.stringify(streak);
+    const existing = await db.settings.where('key').equals('userStreak').first();
+    
+    if (existing) {
+      await db.settings.update(existing.id!, { value: streakJson });
+    } else {
+      await db.settings.add({ key: 'userStreak', value: streakJson });
+    }
+  } catch (error) {
+    console.error("Failed to save streak", error);
+  }
+};
+
+export const updateStreak = async (date?: Date): Promise<UserStreak> => {
+  const today = date || new Date();
+  const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+  
+  const streak = await loadStreak();
+  
+  // If already studied today, don't update
+  if (streak.calendar[todayStr]) {
+    return streak;
+  }
+  
+  // Mark today as completed
+  streak.calendar[todayStr] = true;
+  streak.totalStudyDays++;
+  
+  // Calculate streak
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  
+  if (streak.lastStudyDate === yesterdayStr) {
+    // Continue streak
+    streak.currentStreak++;
+  } else if (streak.lastStudyDate === todayStr) {
+    // Already counted today
+  } else {
+    // Streak broken, start new
+    streak.currentStreak = 1;
+  }
+  
+  // Update longest streak
+  if (streak.currentStreak > streak.longestStreak) {
+    streak.longestStreak = streak.currentStreak;
+  }
+  
+  streak.lastStudyDate = todayStr;
+  
+  await saveStreak(streak);
+  return streak;
 };

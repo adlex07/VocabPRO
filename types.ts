@@ -112,9 +112,21 @@ export interface UserSettings {
     voice?: string;
     autoPlay: boolean;
   };
+  dailyGoal?: {
+    reviews: number;
+    newWords: number;
+  };
 }
 
 export interface FocusSettings {
   enabled: boolean;
   intensity: number;
+}
+
+export interface UserStreak {
+  currentStreak: number;
+  longestStreak: number;
+  lastStudyDate: string; // YYYY-MM-DD format
+  calendar: Record<string, boolean>; // YYYY-MM-DD -> completed
+  totalStudyDays: number;
 }
