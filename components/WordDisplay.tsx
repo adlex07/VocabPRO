@@ -173,7 +173,7 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
       {/* Active Elaboration (Always available once core is loaded, theoretically, but let's wait for stage 2) */}
       {data.word && loadingStage >= 3 && (
         <div className="mt-8 animate-fade-in">
-          <ElaborationSection word={data.word} />
+          <ElaborationSection word={data.word} settings={settings} />
         </div>
       )}
     </div>

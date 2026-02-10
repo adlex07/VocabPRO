@@ -98,11 +98,16 @@ export interface QuickDefinitionResult {
   definition: string;
 }
 
+export type LLMProvider = 'gemini' | 'cerebras';
+
 export interface UserSettings {
   showMnemonics: boolean;
   autoAudio: boolean;
   lookupHistory: string[];
   showVisuals?: boolean;
+  llmProvider?: LLMProvider;
+  geminiApiKey?: string;
+  cerebrasApiKey?: string;
 }
 
 export interface FocusSettings {

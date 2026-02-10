@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { WordData, UserSettings } from './types';
-import { fetchWordStage1, fetchWordStage2, fetchWordStage3, getQuickDefinition } from './services/geminiService';
+import { fetchWordStage1, fetchWordStage2, fetchWordStage3, getQuickDefinition } from './services/llmService';
 import { saveWordToHistory } from './services/storageService';
 import { migrateFromLocalStorage } from './services/db';
 import Dashboard from './components/dashboard/Dashboard';
@@ -9,6 +9,7 @@ import ReviewSchedule from './components/ReviewSchedule';
 import StudyTab from './components/StudyTab';
 import ContextualImageSearch from './components/ContextualImageSearch';
 import QuickDefinition from './components/QuickDefinition';
+import Settings from './components/Settings';
 import { SearchIcon, GraduationCapIcon, SettingsIcon, BookOpenIcon, XIcon, LayoutGridIcon } from './components/Icons';
 
 type Tab = 'search' | 'study' | 'dashboard';
@@ -28,6 +29,9 @@ const App: React.FC = () => {
     showMnemonics: true,
     autoAudio: false,
     lookupHistory: [],
+    llmProvider: 'gemini',
+    geminiApiKey: process.env.GEMINI_API_KEY || '',
+    cerebrasApiKey: process.env.CEREBRAS_API_KEY || ''
   });
   const [showSettings, setShowSettings] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -91,6 +95,17 @@ const App: React.FC = () => {
     const targetWord = overrideQuery || query;
     if (!targetWord.trim()) return;
 
+    const provider = settings.llmProvider || 'gemini';
+    const apiKey = provider === 'cerebras' 
+      ? settings.cerebrasApiKey || ''
+      : settings.geminiApiKey || process.env.GEMINI_API_KEY || '';
+
+    if (!apiKey) {
+      setError(`Please configure your ${provider === 'gemini' ? 'Gemini' : 'Cerebras'} API key in settings.`);
+      setShowSettings(true);
+      return;
+    }
+
     setError(null);
     setWordData({ word: targetWord, mastery: 0 }); // Instant feedback
     setLoadingStage(1);
@@ -101,7 +116,7 @@ const App: React.FC = () => {
 
     try {
       // Stage 1: Core Essentials
-      const stage1 = await fetchWordStage1(targetWord);
+      const stage1 = await fetchWordStage1(targetWord, provider, apiKey);
       setWordData(prev => ({ ...prev, ...stage1 }));
       setLoadingStage(2);
 
@@ -112,12 +127,12 @@ const App: React.FC = () => {
       }));
 
       // Stage 2: Context
-      const stage2 = await fetchWordStage2(targetWord);
+      const stage2 = await fetchWordStage2(targetWord, provider, apiKey);
       setWordData(prev => ({ ...prev, ...stage2 }));
       setLoadingStage(3);
 
       // Stage 3: Deep Learning
-      const stage3 = await fetchWordStage3(targetWord);
+      const stage3 = await fetchWordStage3(targetWord, provider, apiKey);
       
       const completeData = {
         word: targetWord,
@@ -149,6 +164,13 @@ const App: React.FC = () => {
   };
 
   const handleWordClick = async (word: string, rect: DOMRect) => {
+     const provider = settings.llmProvider || 'gemini';
+     const apiKey = provider === 'cerebras' 
+       ? settings.cerebrasApiKey || ''
+       : settings.geminiApiKey || process.env.GEMINI_API_KEY || '';
+
+     if (!apiKey) return;
+
      setQuickDef({
        word,
        definition: null,
@@ -157,7 +179,7 @@ const App: React.FC = () => {
      });
 
      try {
-       const res = await getQuickDefinition(word);
+       const res = await getQuickDefinition(word, provider, apiKey);
        setQuickDef(prev => prev && prev.word === word ? { ...prev, definition: res.definition, loading: false } : prev);
      } catch (e) {
        setQuickDef(null);
@@ -178,8 +200,8 @@ const App: React.FC = () => {
     setQuickDef(null);
   };
 
-  const toggleSetting = (key: keyof UserSettings) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  const handleSettingsChange = (newSettings: UserSettings) => {
+    setSettings(newSettings);
   };
 
   const triggerSearchModal = () => {
@@ -321,23 +343,11 @@ const App: React.FC = () => {
               </button>
               
               {showSettings && (
-                <div className="absolute right-0 top-12 w-64 bg-slate-900 border border-slate-700 shadow-2xl rounded-xl p-5 z-50 animate-fade-in">
-                  <h3 className="font-bold text-white mb-4 border-b border-slate-700 pb-2">Preferences</h3>
-                  
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="flex items-center justify-between cursor-pointer group">
-                        <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Mnemonics</span>
-                        <input 
-                          type="checkbox" 
-                          checked={settings.showMnemonics} 
-                          onChange={() => toggleSetting('showMnemonics')}
-                          className="accent-orange-500" 
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </div>
+                <Settings 
+                  settings={settings}
+                  onSettingsChange={handleSettingsChange}
+                  onClose={() => setShowSettings(false)}
+                />
               )}
             </div>
           </div>
