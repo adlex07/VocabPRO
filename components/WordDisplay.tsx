@@ -71,7 +71,7 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
              {loadingStage >= 2 || data.pronunciation ? (
                <div className="flex items-center gap-3 text-slate-500 animate-fade-in">
                  <span className="font-mono text-lg bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">{data.pronunciation}</span>
-                 <span className="italic font-semibold text-orange-600 bg-orange-50 px-3 py-1 rounded-lg">{data.partOfSpeech}</span>
+                 <span className="italic font-semibold text-orange-700 bg-orange-50 px-3 py-1 rounded-lg border border-orange-200">{data.partOfSpeech}</span>
                </div>
              ) : (
                <div className="flex gap-3 w-full max-w-xs">
