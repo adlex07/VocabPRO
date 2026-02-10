@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { PenIcon, CheckIcon } from './Icons';
-import { checkElaboration } from '../services/geminiService';
-import { ElaborationFeedback } from '../types';
+import { checkElaboration } from '../services/llmService';
+import { ElaborationFeedback, UserSettings } from '../types';
 
 interface ElaborationSectionProps {
   word: string;
+  settings: UserSettings;
 }
 
-const ElaborationSection: React.FC<ElaborationSectionProps> = ({ word }) => {
+const ElaborationSection: React.FC<ElaborationSectionProps> = ({ word, settings }) => {
   const [definition, setDefinition] = useState('');
   const [sentence, setSentence] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,9 +25,26 @@ const ElaborationSection: React.FC<ElaborationSectionProps> = ({ word }) => {
   const handleSubmit = async () => {
     if (!definition || !sentence) return;
     
+    const provider = settings.llmProvider || 'gemini';
+    const apiKey = provider === 'cerebras' 
+      ? settings.cerebrasApiKey || ''
+      : settings.geminiApiKey || process.env.GEMINI_API_KEY || '';
+
+    if (!apiKey) {
+      setFeedback({
+        isCorrect: true,
+        generalFeedback: "Please configure your API key in settings to get feedback.",
+        definitionScore: 5,
+        sentenceScore: 5,
+        definitionFeedback: "API key required.",
+        sentenceFeedback: "API key required."
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      const result = await checkElaboration(word, definition, sentence);
+      const result = await checkElaboration(word, definition, sentence, provider, apiKey);
       setFeedback(result);
     } catch (error) {
       console.error("Error checking elaboration:", error);

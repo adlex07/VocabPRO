@@ -1,11 +1,19 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { WordData, ElaborationFeedback, QuickDefinitionResult } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 const model = "gemini-3-flash-preview";
 
+const getAI = (apiKey?: string) => {
+  const key = apiKey || process.env.API_KEY || process.env.GEMINI_API_KEY;
+  if (!key) {
+    throw new Error("Gemini API key is required");
+  }
+  return new GoogleGenAI({ apiKey: key });
+};
+
 // Stage 1: Core Essentials
-export const fetchWordStage1 = async (word: string): Promise<Partial<WordData>> => {
+export const fetchWordStage1 = async (word: string, apiKey?: string): Promise<Partial<WordData>> => {
+  const ai = getAI(apiKey);
   const response = await ai.models.generateContent({
     model,
     contents: `You are an expert tutor. Define the word "${word}".
@@ -36,7 +44,8 @@ export const fetchWordStage1 = async (word: string): Promise<Partial<WordData>> 
 };
 
 // Stage 2: Context & Examples
-export const fetchWordStage2 = async (word: string): Promise<Partial<WordData>> => {
+export const fetchWordStage2 = async (word: string, apiKey?: string): Promise<Partial<WordData>> => {
+  const ai = getAI(apiKey);
   const response = await ai.models.generateContent({
     model,
     contents: `For the word "${word}", provide context.
@@ -62,7 +71,8 @@ export const fetchWordStage2 = async (word: string): Promise<Partial<WordData>> 
 };
 
 // Stage 3: Deep Learning & Quiz
-export const fetchWordStage3 = async (word: string): Promise<Partial<WordData>> => {
+export const fetchWordStage3 = async (word: string, apiKey?: string): Promise<Partial<WordData>> => {
+  const ai = getAI(apiKey);
   const response = await ai.models.generateContent({
     model,
     contents: `For the word "${word}", provide DEEP LEARNING content and QUIZ.
@@ -165,15 +175,16 @@ export const fetchWordStage3 = async (word: string): Promise<Partial<WordData>> 
 };
 
 // Deprecated single-call function (kept for reference or fallback if needed, but not used in new flow)
-export const lookupWord = async (word: string): Promise<WordData> => {
+export const lookupWord = async (word: string, apiKey?: string): Promise<WordData> => {
   // This is replaced by stage 1, 2, 3 calls in the UI
-  const s1 = await fetchWordStage1(word);
-  const s2 = await fetchWordStage2(word);
-  const s3 = await fetchWordStage3(word);
+  const s1 = await fetchWordStage1(word, apiKey);
+  const s2 = await fetchWordStage2(word, apiKey);
+  const s3 = await fetchWordStage3(word, apiKey);
   return { ...s1, ...s2, ...s3, mastery: 0 } as WordData;
 };
 
-export const checkElaboration = async (word: string, userDefinition: string, userSentence: string): Promise<ElaborationFeedback> => {
+export const checkElaboration = async (word: string, userDefinition: string, userSentence: string, apiKey?: string): Promise<ElaborationFeedback> => {
+  const ai = getAI(apiKey);
   const response = await ai.models.generateContent({
     model,
     contents: `Act as a supportive but strict vocabulary tutor. Evaluate the user's understanding of the word "${word}".
@@ -209,7 +220,8 @@ export const checkElaboration = async (word: string, userDefinition: string, use
   return JSON.parse(text) as ElaborationFeedback;
 };
 
-export const getQuickDefinition = async (word: string): Promise<QuickDefinitionResult> => {
+export const getQuickDefinition = async (word: string, apiKey?: string): Promise<QuickDefinitionResult> => {
+  const ai = getAI(apiKey);
   const response = await ai.models.generateContent({
     model,
     contents: `Define "${word}" in 12 words or less. Simple and direct.`,
