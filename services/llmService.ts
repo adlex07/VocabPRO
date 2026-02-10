@@ -11,7 +11,7 @@ export const fetchWordStage1 = async (
   if (provider === "cerebras") {
     return cerebrasService.fetchWordStage1(word, apiKey);
   }
-  return geminiService.fetchWordStage1(word);
+  return geminiService.fetchWordStage1(word, apiKey);
 };
 
 export const fetchWordStage2 = async (
@@ -22,7 +22,7 @@ export const fetchWordStage2 = async (
   if (provider === "cerebras") {
     return cerebrasService.fetchWordStage2(word, apiKey);
   }
-  return geminiService.fetchWordStage2(word);
+  return geminiService.fetchWordStage2(word, apiKey);
 };
 
 export const fetchWordStage3 = async (
@@ -33,7 +33,7 @@ export const fetchWordStage3 = async (
   if (provider === "cerebras") {
     return cerebrasService.fetchWordStage3(word, apiKey);
   }
-  return geminiService.fetchWordStage3(word);
+  return geminiService.fetchWordStage3(word, apiKey);
 };
 
 export const lookupWord = async (
@@ -44,7 +44,7 @@ export const lookupWord = async (
   if (provider === "cerebras") {
     return cerebrasService.lookupWord(word, apiKey);
   }
-  return geminiService.lookupWord(word);
+  return geminiService.lookupWord(word, apiKey);
 };
 
 export const checkElaboration = async (
@@ -57,7 +57,7 @@ export const checkElaboration = async (
   if (provider === "cerebras") {
     return cerebrasService.checkElaboration(word, userDefinition, userSentence, apiKey);
   }
-  return geminiService.checkElaboration(word, userDefinition, userSentence);
+  return geminiService.checkElaboration(word, userDefinition, userSentence, apiKey);
 };
 
 export const getQuickDefinition = async (
@@ -68,5 +68,5 @@ export const getQuickDefinition = async (
   if (provider === "cerebras") {
     return cerebrasService.getQuickDefinition(word, apiKey);
   }
-  return geminiService.getQuickDefinition(word);
+  return geminiService.getQuickDefinition(word, apiKey);
 };
