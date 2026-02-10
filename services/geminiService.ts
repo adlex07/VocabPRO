@@ -207,6 +207,9 @@ export const fetchWordStage3 = async (word: string): Promise<Partial<WordData>> 
   ]);
 
   // Combine results into the expected structure
+  // Note: Properties from coreLearning and memoryAids are mutually exclusive by design:
+  // - coreLearning: conceptOrigin, comparisons, etymology, synonyms, antonyms, relatedWords
+  // - memoryAids: analogy, mentalImage, memoryStory, mnemonic, associationPrompt, arabicAssociations
   return {
     deepLearning: {
       ...coreLearning,
