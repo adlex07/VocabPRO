@@ -1,5 +1,9 @@
 <div align="center">
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+
+<p>
+View your app in AI Studio: <a href="https://ai.studio/apps/drive/10pYSYK-xN6A8ZWxvZuMHluThVqZEleub">ai.studio/apps/drive/10pYSYK-xN6A8ZWxvZuMHluThVqZEleub</a>
+</p>
 </div>
 
 # DeepVocab - AI-Powered Vocabulary Mastery
@@ -354,7 +358,5 @@ For issues, questions, or suggestions:
 - Review [FEATURE_ROADMAP.md](./FEATURE_ROADMAP.md) for planned features
 
 ---
-
-View your app in AI Studio: https://ai.studio/apps/drive/10pYSYK-xN6A8ZWxvZuMHluThVqZEleub
 
 **Made with ❤️ for serious learners who want to truly master vocabulary, not just memorize it.**
