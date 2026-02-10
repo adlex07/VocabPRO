@@ -42,7 +42,7 @@ DeepVocab is an intelligent vocabulary learning application that uses AI and cog
 
 ## 📋 Prerequisites
 
-- **Node.js** (version 16 or higher recommended)
+- **Node.js** (version 18 LTS or higher recommended)
 - **Gemini API Key** from Google AI Studio
 
 ## 🚀 Installation & Setup
