@@ -15,26 +15,26 @@ interface WordCardProps {
 const WordCard: React.FC<WordCardProps> = ({ wordData, isDueItem, onClick }) => (
   <button
     onClick={() => onClick(wordData)}
-    className={`group p-6 rounded-xl border transition-all text-left flex flex-col items-start relative overflow-hidden w-full ${
+    className={`group p-6 rounded-2xl border transition-all text-left flex flex-col items-start relative overflow-hidden w-full ${
       isDueItem 
-        ? 'bg-orange-500/10 border-orange-500/50 hover:bg-orange-500/20' 
-        : 'bg-white border-slate-200 hover:border-orange-300 hover:shadow-lg'
+        ? 'bg-gradient-to-br from-orange-500/15 to-red-500/10 border-orange-500/50 hover:border-orange-500/70 hover:shadow-xl hover:shadow-orange-500/20' 
+        : 'bg-white border-slate-200 hover:border-orange-300 hover:shadow-xl shadow-sm hover:scale-[1.02]'
     }`}
   >
     <div className="flex justify-between w-full mb-2">
-      <h3 className={`text-xl font-bold transition-colors ${
+      <h3 className={`text-xl font-bold transition-colors heading-font ${
         isDueItem ? 'text-white' : 'text-slate-800 group-hover:text-orange-600'
       }`}>
         {wordData.word}
       </h3>
-      <span className={`text-xs font-mono px-2 py-1 rounded ${
-         isDueItem ? 'bg-black/30 text-orange-200' : 'bg-slate-100 text-slate-500'
+      <span className={`text-xs font-bold px-3 py-1.5 rounded-lg ${
+         isDueItem ? 'bg-black/30 text-orange-200 border border-orange-500/30' : 'bg-slate-100 text-slate-600 border border-slate-200'
       }`}>
         {wordData.partOfSpeech}
       </span>
     </div>
-    <p className={`text-sm line-clamp-2 mb-4 flex-grow ${
-      isDueItem ? 'text-orange-100' : 'text-slate-500'
+    <p className={`text-sm line-clamp-2 mb-4 flex-grow leading-relaxed ${
+      isDueItem ? 'text-orange-100' : 'text-slate-600'
     }`}>
       {wordData.simpleDefinition}
     </p>
@@ -44,7 +44,7 @@ const WordCard: React.FC<WordCardProps> = ({ wordData, isDueItem, onClick }) => 
           <ClockIcon className="w-4 h-4" /> Review Now
        </div>
     ) : (
-       <div className="w-full pt-4 border-t border-slate-50 flex justify-between items-center text-sm font-medium text-indigo-500 group-hover:text-orange-600">
+       <div className="w-full pt-4 border-t border-slate-100 flex justify-between items-center text-sm font-semibold text-orange-600 group-hover:text-orange-700">
          <span>{wordData.fsrs ? getFSRSStage(wordData.fsrs) : 'New'}</span>
          <span>
            {wordData.fsrs?.scheduledDays

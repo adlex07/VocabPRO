@@ -5,10 +5,10 @@ import { WordData } from '../../types';
 import { SearchIcon, TrashIcon, EyeIcon } from '../Icons';
 
 const StatCard = ({ title, value, sub, color }: any) => (
-  <div className="bg-[#1A1A1E] border border-white/5 p-4 rounded-xl">
-    <div className="text-slate-400 text-sm font-medium mb-1">{title}</div>
-    <div className="text-2xl font-bold text-white">{value}</div>
-    {sub && <div className={`text-xs mt-2 ${color}`}>{sub}</div>}
+  <div className="bg-gradient-to-br from-[#1A1A1E] to-[#151518] border border-white/10 p-5 rounded-xl hover:shadow-xl hover:shadow-orange-500/10 transition-all hover:scale-[1.02]">
+    <div className="text-slate-400 text-sm font-bold mb-2 uppercase tracking-wider">{title}</div>
+    <div className="text-3xl font-bold text-white heading-font">{value}</div>
+    {sub && <div className={`text-xs mt-3 font-semibold ${color}`}>{sub}</div>}
   </div>
 );
 
@@ -44,7 +44,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onViewWord }) => {
   return (
     <div className="animate-fade-in space-y-6 pb-20">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Data Manager</h1>
+        <h1 className="text-2xl font-bold text-white heading-font">Data Manager</h1>
         <div className="flex gap-2">
            {/* Actions like Export/Import could go here */}
         </div>
