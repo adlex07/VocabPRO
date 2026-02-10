@@ -52,17 +52,17 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
   return (
     <div className="animate-fade-in-up">
       {/* Primary Definition Card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6 relative transition-all duration-300">
+      <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200 overflow-hidden mb-6 relative transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/60">
         {/* Mastery Bar */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-slate-100">
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-100">
            <div 
-             className="h-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 transition-all duration-1000" 
+             className="h-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 transition-all duration-1000 shadow-sm" 
              style={{ width: `${mastery}%` }}
            ></div>
         </div>
 
         {/* Header */}
-        <div className="bg-slate-50 p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-baseline gap-4 justify-between">
+        <div className="bg-gradient-to-br from-slate-50 to-white p-6 border-b border-slate-200 flex flex-col md:flex-row md:items-baseline gap-4 justify-between">
           <div className="flex flex-col md:flex-row md:items-baseline gap-4 w-full">
              <h1 className="text-4xl font-bold text-slate-900 tracking-tight heading-font">
                {data.word || <SkeletonLine className="w-48 h-10" />}
@@ -70,8 +70,8 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
              
              {loadingStage >= 2 || data.pronunciation ? (
                <div className="flex items-center gap-3 text-slate-500 animate-fade-in">
-                 <span className="font-mono text-lg bg-white px-2 py-1 rounded border border-slate-200">{data.pronunciation}</span>
-                 <span className="italic font-medium text-indigo-600">{data.partOfSpeech}</span>
+                 <span className="font-mono text-lg bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">{data.pronunciation}</span>
+                 <span className="italic font-semibold text-orange-600 bg-orange-50 px-3 py-1 rounded-lg">{data.partOfSpeech}</span>
                </div>
              ) : (
                <div className="flex gap-3 w-full max-w-xs">
@@ -80,7 +80,7 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
                </div>
              )}
           </div>
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0">
+          <div className="text-xs font-bold text-slate-500 uppercase tracking-widest shrink-0 bg-slate-100 px-3 py-1.5 rounded-lg">
              MASTERY: {mastery}%
           </div>
         </div>
@@ -127,9 +127,9 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
                 </h3>
                 <ul className="space-y-3">
                   {data.examples.map((ex, idx) => (
-                    <li key={idx} className="flex gap-3 text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                      <span className="text-indigo-400 font-bold select-none">{idx + 1}.</span>
-                      <span>{interact(ex)}</span>
+                    <li key={idx} className="flex gap-3 text-slate-700 bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                      <span className="text-orange-500 font-bold select-none">{idx + 1}.</span>
+                      <span className="leading-relaxed">{interact(ex)}</span>
                     </li>
                   ))}
                 </ul>
@@ -139,7 +139,7 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
                     <h3 className="text-sm uppercase tracking-wider font-bold text-slate-400 mb-3 heading-font">Word Family</h3>
                     <div className="flex flex-wrap gap-2">
                       {data.wordFamily.map((item, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium">
+                        <span key={idx} className="px-4 py-2 bg-gradient-to-br from-orange-50 to-red-50 text-orange-700 rounded-full text-sm font-semibold border border-orange-200 hover:shadow-md transition-shadow">
                           {item}
                         </span>
                       ))}

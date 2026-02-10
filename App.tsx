@@ -231,7 +231,7 @@ const App: React.FC = () => {
                   {query.trim() && (
                     <button
                       type="submit"
-                      className="hidden md:block px-4 py-1.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-orange-900/20"
+                      className="hidden md:block px-5 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-orange-900/30 hover:shadow-xl hover:shadow-orange-900/40 hover:scale-[1.02]"
                     >
                       Search
                     </button>
@@ -270,9 +270,9 @@ const App: React.FC = () => {
             <nav className="hidden md:flex gap-1 md:gap-2">
               <button 
                 onClick={() => setActiveTab('search')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${
                   activeTab === 'search' 
-                    ? 'bg-white/10 text-white shadow-inner' 
+                    ? 'bg-orange-500/20 text-white shadow-md shadow-orange-500/20 border border-orange-500/30' 
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -280,9 +280,9 @@ const App: React.FC = () => {
               </button>
               <button 
                 onClick={() => setActiveTab('study')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${
                   activeTab === 'study' 
-                    ? 'bg-white/10 text-white shadow-inner' 
+                    ? 'bg-orange-500/20 text-white shadow-md shadow-orange-500/20 border border-orange-500/30' 
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -290,9 +290,9 @@ const App: React.FC = () => {
               </button>
               <button 
                 onClick={() => setActiveTab('dashboard')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${
                   activeTab === 'dashboard' 
-                    ? 'bg-white/10 text-white shadow-inner' 
+                    ? 'bg-orange-500/20 text-white shadow-md shadow-orange-500/20 border border-orange-500/30' 
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -304,11 +304,11 @@ const App: React.FC = () => {
             {wordData && (
               <button
                 onClick={triggerSearchModal}
-                className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 px-3 py-1.5 rounded-lg transition-all text-sm group"
+                className="flex items-center gap-2 bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-500/30 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg transition-all text-sm group font-medium"
               >
-                <SearchIcon className="w-4 h-4 group-hover:text-white" />
+                <SearchIcon className="w-4 h-4 group-hover:text-orange-400" />
                 <span className="hidden md:inline">Quick Search</span>
-                <span className="hidden md:inline text-xs bg-white/10 px-1.5 py-0.5 rounded ml-2 border border-white/5">⌘K</span>
+                <span className="hidden md:inline text-xs bg-white/10 px-1.5 py-0.5 rounded ml-2 border border-white/5 font-mono">⌘K</span>
               </button>
             )}
             
@@ -345,7 +345,7 @@ const App: React.FC = () => {
       </header>
       
       {/* Mobile Nav */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#050202]/95 border-t border-white/10 backdrop-blur-lg z-50 flex justify-around p-3">
+      <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#050202]/98 border-t border-white/10 backdrop-blur-xl z-50 flex justify-around p-3 shadow-2xl shadow-black/50">
           <button 
             onClick={() => {
               if (activeTab === 'search') {
@@ -354,24 +354,24 @@ const App: React.FC = () => {
                 setActiveTab('search');
               }
             }}
-            className={`flex flex-col items-center transition-colors ${activeTab === 'search' ? 'text-orange-500' : 'text-slate-500'}`}
+            className={`flex flex-col items-center transition-all ${activeTab === 'search' ? 'text-orange-500 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
           >
             <SearchIcon className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Search</span>
+            <span className="text-xs font-bold">Search</span>
           </button>
           <button 
             onClick={() => setActiveTab('study')}
-            className={`flex flex-col items-center transition-colors ${activeTab === 'study' ? 'text-orange-500' : 'text-slate-500'}`}
+            className={`flex flex-col items-center transition-all ${activeTab === 'study' ? 'text-orange-500 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
           >
             <BookOpenIcon className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Library</span>
+            <span className="text-xs font-bold">Library</span>
           </button>
           <button 
             onClick={() => setActiveTab('dashboard')}
-            className={`flex flex-col items-center transition-colors ${activeTab === 'dashboard' ? 'text-orange-500' : 'text-slate-500'}`}
+            className={`flex flex-col items-center transition-all ${activeTab === 'dashboard' ? 'text-orange-500 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
           >
             <LayoutGridIcon className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Dash</span>
+            <span className="text-xs font-bold">Dash</span>
           </button>
       </div>
 
@@ -394,21 +394,21 @@ const App: React.FC = () => {
               {/* Only show the large hero search if NOT reading a word. If reading, use the header/modal search. */}
               {!wordData && (
                 <form onSubmit={(e) => handleSearch(e)} className="relative max-w-xl mx-auto group">
-                  <div className={`absolute inset-0 bg-orange-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-500 ${loadingStage > 0 ? 'animate-pulse' : ''}`}></div>
-                  <div className="relative flex items-center bg-white/95 backdrop-blur rounded-2xl shadow-2xl border border-white/20 overflow-hidden p-2">
+                  <div className={`absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity duration-500 ${loadingStage > 0 ? 'animate-pulse' : ''}`}></div>
+                  <div className="relative flex items-center bg-white/98 backdrop-blur-lg rounded-2xl shadow-2xl border border-orange-100 overflow-hidden p-2 ring-1 ring-orange-200/50">
                     <SearchIcon className="ml-4 w-6 h-6 text-slate-400" />
                     <input
                       type="text"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder="What word do you want to master?"
-                      className="w-full px-4 py-3 text-lg outline-none placeholder:text-slate-400 text-slate-900 bg-transparent"
+                      className="w-full px-4 py-3 text-lg outline-none placeholder:text-slate-400 text-slate-900 bg-transparent font-medium"
                       autoFocus={!wordData}
                     />
                     <button 
                       type="submit" 
                       disabled={loadingStage > 0 || !query}
-                      className="bg-gradient-to-r from-slate-900 to-slate-800 hover:from-black hover:to-slate-900 text-white px-6 py-3 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                      className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white px-8 py-3 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-[1.02]"
                     >
                       {loadingStage > 0 ? (
                         loadingStage === 1 ? 'Analyzing...' : 'Building...'
@@ -448,9 +448,9 @@ const App: React.FC = () => {
                 <div className="text-center pt-12 pb-8">
                     <button 
                       onClick={triggerSearchModal}
-                      className="text-slate-400 hover:text-white font-medium transition-colors flex items-center gap-2 mx-auto"
+                      className="text-slate-400 hover:text-white font-bold transition-all flex items-center gap-2 mx-auto bg-white/5 hover:bg-orange-500/20 px-6 py-3 rounded-xl border border-white/10 hover:border-orange-500/30 group"
                     >
-                      <SearchIcon className="w-4 h-4" /> Search another word
+                      <SearchIcon className="w-4 h-4 group-hover:text-orange-400" /> Search another word
                     </button>
                 </div>
               </div>
