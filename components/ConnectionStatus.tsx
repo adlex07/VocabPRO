@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 interface ConnectionStatusProps {
   isLoading: boolean;
@@ -7,26 +7,7 @@ interface ConnectionStatusProps {
 }
 
 const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ isLoading, error, stage }) => {
-  const [retryMessage, setRetryMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Listen for retry messages from console
-    const originalConsoleLog = console.log;
-    console.log = function (...args) {
-      const message = args.join(' ');
-      if (message.includes('Retrying...')) {
-        setRetryMessage(message);
-        setTimeout(() => setRetryMessage(null), 3000);
-      }
-      originalConsoleLog.apply(console, args);
-    };
-
-    return () => {
-      console.log = originalConsoleLog;
-    };
-  }, []);
-
-  if (!isLoading && !error && !retryMessage) {
+  if (!isLoading && !error) {
     return null;
   }
 
@@ -70,9 +51,6 @@ const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ isLoading, error, s
             </div>
             <div className="flex-1">
               <p className="text-sm text-white font-medium">{getStageMessage()}</p>
-              {retryMessage && (
-                <p className="text-xs text-orange-400 mt-1">{retryMessage}</p>
-              )}
             </div>
           </div>
           
@@ -108,33 +86,6 @@ const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ isLoading, error, s
             <div className="flex-1">
               <p className="text-sm text-red-100 font-medium">Connection Issue</p>
               <p className="text-xs text-red-200/80 mt-1">{error}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Retry indicator (when retrying but not showing full error) */}
-      {retryMessage && !error && (
-        <div className="bg-orange-900/95 border border-orange-500/30 rounded-xl p-4 shadow-2xl backdrop-blur-sm animate-fade-in">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <svg
-                className="w-5 h-5 text-orange-400 animate-spin"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm text-orange-100 font-medium">Reconnecting...</p>
-              <p className="text-xs text-orange-200/80 mt-1">{retryMessage}</p>
             </div>
           </div>
         </div>

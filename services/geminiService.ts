@@ -90,7 +90,7 @@ const retry = async <T>(
 };
 
 // Helper function to safely parse JSON response
-const parseJSONResponse = (text: string | undefined | null, stageName: string): any => {
+const parseJSONResponse = (text: string | undefined | null, stageName: string): unknown => {
   if (!text || text.trim() === "") {
     throw new APIError(`No response received for ${stageName}`, "EMPTY_RESPONSE", true);
   }

@@ -161,7 +161,7 @@ const App: React.FC = () => {
       } else if (err instanceof APIError) {
         if (err.code === 'HTTP_429') {
           msg = "Rate limit exceeded. Please wait a moment and try again.";
-        } else if (err.code?.startsWith('HTTP_5')) {
+        } else if (err.code && /^HTTP_5\d+$/.test(err.code)) {
           msg = "The API service is temporarily unavailable. Please try again later.";
         } else {
           msg = err.message || "An API error occurred. Please try again.";
