@@ -22,7 +22,7 @@ const ArabicAssociations: React.FC<ArabicAssociationsProps> = ({ data }) => {
           <div className="p-2 rounded-lg bg-purple-500 bg-opacity-20 text-purple-700">
             <GlobeIcon className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-slate-800">Arabic Associations</h3>
+          <h3 className="font-bold text-slate-800 heading-font">Arabic Associations</h3>
         </div>
         <ChevronDownIcon className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>

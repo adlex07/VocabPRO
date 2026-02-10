@@ -64,7 +64,7 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
         {/* Header */}
         <div className="bg-slate-50 p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-baseline gap-4 justify-between">
           <div className="flex flex-col md:flex-row md:items-baseline gap-4 w-full">
-             <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
+             <h1 className="text-4xl font-bold text-slate-900 tracking-tight heading-font">
                {data.word || <SkeletonLine className="w-48 h-10" />}
              </h1>
              
@@ -89,7 +89,7 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
           {/* Definitions - Stage 1 */}
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <h3 className="text-sm uppercase tracking-wider font-semibold text-slate-400">Simple Definition</h3>
+              <h3 className="text-sm uppercase tracking-wider font-bold text-slate-400 heading-font">Simple Definition</h3>
               {data.simpleDefinition ? (
                 <div className="text-lg text-slate-800 leading-relaxed font-medium animate-fade-in">
                   {interact(data.simpleDefinition)}
@@ -102,7 +102,7 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
               )}
             </div>
             <div className="space-y-2">
-              <h3 className="text-sm uppercase tracking-wider font-semibold text-slate-400">Precise Definition</h3>
+              <h3 className="text-sm uppercase tracking-wider font-bold text-slate-400 heading-font">Precise Definition</h3>
                {data.preciseDefinition ? (
                 <div className="text-lg text-slate-600 leading-relaxed font-serif animate-fade-in">
                   {interact(data.preciseDefinition)}
@@ -121,7 +121,7 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
              <SectionLoader text="Loading context and examples..." />
           ) : data.examples ? (
              <div className="animate-fade-in">
-                <h3 className="text-sm uppercase tracking-wider font-semibold text-slate-400 mb-3 flex items-center gap-2">
+                <h3 className="text-sm uppercase tracking-wider font-bold text-slate-400 mb-3 flex items-center gap-2 heading-font">
                   <BookOpenIcon className="w-4 h-4" /> Context & Usage
                   <CheckIcon className="w-3 h-3 text-green-500 ml-auto" />
                 </h3>
@@ -136,7 +136,7 @@ const WordDisplay: React.FC<WordDisplayProps> = ({
                 
                 {data.wordFamily && (
                   <div className="pt-4 mt-4 border-t border-slate-100">
-                    <h3 className="text-sm uppercase tracking-wider font-semibold text-slate-400 mb-3">Word Family</h3>
+                    <h3 className="text-sm uppercase tracking-wider font-bold text-slate-400 mb-3 heading-font">Word Family</h3>
                     <div className="flex flex-wrap gap-2">
                       {data.wordFamily.map((item, idx) => (
                         <span key={idx} className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium">

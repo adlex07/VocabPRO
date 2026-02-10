@@ -231,7 +231,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({ data }) => {
             Which word means:
           </p>
           <div className="bg-indigo-50 border border-indigo-200 p-4 rounded-lg mx-auto max-w-2xl">
-            <h3 className="text-2xl font-bold text-indigo-900">{data.simpleDefinition}</h3>
+            <h3 className="text-2xl font-bold text-indigo-900 heading-font">{data.simpleDefinition}</h3>
           </div>
           
           {data.deepLearning && (
@@ -365,7 +365,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({ data }) => {
       <div className="space-y-6">
         <div className="text-center space-y-2">
           <p className="text-sm uppercase tracking-wide text-slate-500 font-semibold">Select the Best Definition</p>
-          <h3 className="text-3xl font-extrabold text-slate-900">{data.word}</h3>
+          <h3 className="text-3xl font-extrabold text-slate-900 heading-font">{data.word}</h3>
         </div>
 
         <div className="grid gap-3">
@@ -507,7 +507,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({ data }) => {
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-4 flex items-center justify-between text-white">
         <div className="flex items-center gap-2">
            <BrainIcon className="w-6 h-6 text-fuchsia-400" />
-           <h2 className="text-xl font-bold">Adaptive Quiz</h2>
+           <h2 className="text-xl font-bold heading-font">Adaptive Quiz</h2>
         </div>
         <div className="flex items-center gap-3">
           {quizHistory.consecutiveCorrect > 0 && (

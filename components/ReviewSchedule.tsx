@@ -13,7 +13,7 @@ const ReviewSchedule: React.FC<ReviewScheduleProps> = ({ data }) => {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
          <div className="flex items-center gap-2 mb-4 text-slate-800">
             <ClockIcon className="w-5 h-5 text-indigo-500" />
-            <h3 className="font-semibold text-lg">FSRS Memory Engine</h3>
+            <h3 className="font-semibold text-lg heading-font">FSRS Memory Engine</h3>
          </div>
          <p className="text-slate-500 text-sm">
            Take a quiz to start the FSRS memory tracking engine for this word.
@@ -59,7 +59,7 @@ const ReviewSchedule: React.FC<ReviewScheduleProps> = ({ data }) => {
        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2 text-slate-800">
              <ClockIcon className="w-5 h-5 text-indigo-500" />
-             <h3 className="font-semibold text-lg">Memory Strength</h3>
+             <h3 className="font-semibold text-lg heading-font">Memory Strength</h3>
           </div>
           <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
              isDue

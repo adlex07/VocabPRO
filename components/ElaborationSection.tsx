@@ -76,7 +76,7 @@ const ElaborationSection: React.FC<ElaborationSectionProps> = ({ word }) => {
             <div className={`w-12 h-12 ${isSuccess ? 'bg-green-500' : 'bg-amber-500'} rounded-full flex items-center justify-center text-white mb-4 shadow-sm`}>
                {isSuccess ? <CheckIcon className="w-6 h-6" /> : <PenIcon className="w-6 h-6" />}
             </div>
-            <h3 className={`text-xl font-bold ${textClass} mb-2`}>
+            <h3 className={`text-xl font-bold ${textClass} mb-2 heading-font`}>
                 {isSuccess ? 'Great Active Recall!' : 'Good Effort!'}
             </h3>
             <p className={`${isSuccess ? 'text-green-700' : 'text-amber-700'} max-w-lg`}>

@@ -31,7 +31,7 @@ const QuickDefinition: React.FC<QuickDefinitionProps> = ({
       }}
     >
       <div className="flex justify-between items-start mb-2">
-         <h4 className="font-bold text-white capitalize">{word}</h4>
+         <h4 className="font-bold text-white capitalize heading-font">{word}</h4>
          <button 
            onClick={onFullSearch}
            className="text-xs flex items-center gap-1 text-orange-400 hover:text-orange-300 transition-colors"

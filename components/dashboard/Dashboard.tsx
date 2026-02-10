@@ -44,7 +44,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onViewWord }) => {
   return (
     <div className="animate-fade-in space-y-6 pb-20">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Data Manager</h1>
+        <h1 className="text-2xl font-bold text-white heading-font">Data Manager</h1>
         <div className="flex gap-2">
            {/* Actions like Export/Import could go here */}
         </div>

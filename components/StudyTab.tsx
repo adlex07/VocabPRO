@@ -22,7 +22,7 @@ const WordCard: React.FC<WordCardProps> = ({ wordData, isDueItem, onClick }) => 
     }`}
   >
     <div className="flex justify-between w-full mb-2">
-      <h3 className={`text-xl font-bold transition-colors ${
+      <h3 className={`text-xl font-bold transition-colors heading-font ${
         isDueItem ? 'text-white' : 'text-slate-800 group-hover:text-orange-600'
       }`}>
         {wordData.word}

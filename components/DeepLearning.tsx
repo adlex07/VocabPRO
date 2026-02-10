@@ -31,7 +31,7 @@ const ExpandableSection = ({
           <div className={`p-2 rounded-lg ${colorClass} bg-opacity-20 text-current`}>
             <Icon className="w-5 h-5" />
           </div>
-          <h3 className="font-bold text-slate-800">{title}</h3>
+          <h3 className="font-bold text-slate-800 heading-font">{title}</h3>
         </div>
         <ChevronDownIcon className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -52,7 +52,7 @@ const DeepLearning: React.FC<DeepLearningProps> = ({ data }) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 mt-8 ml-1">Deep Learning Modules</h2>
+      <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 mt-8 ml-1 heading-font">Deep Learning Modules</h2>
 
       {/* Conceptual Understanding - Blue Theme */}
       <ExpandableSection 
@@ -63,14 +63,14 @@ const DeepLearning: React.FC<DeepLearningProps> = ({ data }) => {
       >
         <div className="space-y-6">
           <div>
-            <h4 className="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-2">Why this word exists</h4>
+            <h4 className="text-sm font-semibold text-blue-600 uppercase tracking-wide heading-font mb-2">Why this word exists</h4>
             <p className="text-slate-700 leading-relaxed bg-blue-50 p-4 rounded-lg border border-blue-100">
               {deepLearning.conceptOrigin}
             </p>
           </div>
           
           <div>
-             <h4 className="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-3">Distinctions</h4>
+             <h4 className="text-sm font-semibold text-blue-600 uppercase tracking-wide heading-font mb-3">Distinctions</h4>
              <div className="grid md:grid-cols-2 gap-4">
                 {deepLearning.comparisons?.map((comp, idx) => (
                   <div key={idx} className="bg-white border border-slate-200 rounded-lg p-4">
@@ -97,13 +97,13 @@ const DeepLearning: React.FC<DeepLearningProps> = ({ data }) => {
         <div className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
              <div className="space-y-2">
-               <h4 className="text-xs font-bold text-amber-600 uppercase mb-1">Analogy</h4>
+               <h4 className="text-xs font-bold text-amber-600 uppercase heading-font mb-1">Analogy</h4>
                <p className="text-slate-800 font-medium">
                  {deepLearning.analogy}
                </p>
              </div>
              <div className="space-y-2">
-               <h4 className="text-xs font-bold text-amber-600 uppercase mb-1">Mental Image</h4>
+               <h4 className="text-xs font-bold text-amber-600 uppercase heading-font mb-1">Mental Image</h4>
                <p className="text-slate-600 italic">
                  {deepLearning.mentalImage}
                </p>
@@ -115,7 +115,7 @@ const DeepLearning: React.FC<DeepLearningProps> = ({ data }) => {
                <LightbulbIcon className="w-24 h-24 text-amber-500" />
              </div>
              <div className="relative z-10">
-               <h4 className="text-sm font-bold text-amber-800 mb-2 flex items-center gap-2">
+               <h4 className="text-sm font-bold text-amber-800 heading-font mb-2 flex items-center gap-2">
                  STORY HOOK
                </h4>
                <p className="text-slate-800 mb-4 font-serif leading-relaxed text-lg">

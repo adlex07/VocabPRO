@@ -262,7 +262,7 @@ const App: React.FC = () => {
             <div className="bg-gradient-to-br from-orange-500 to-red-600 p-2 rounded-lg shadow-lg shadow-orange-500/20">
                <GraduationCapIcon className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-xl tracking-tight text-white hidden md:block">DeepVocab</span>
+            <span className="logo-text font-bold text-xl tracking-tight text-white hidden md:block">DeepVocab</span>
           </div>
           
           <div className="flex items-center gap-2 md:gap-4">
@@ -381,7 +381,7 @@ const App: React.FC = () => {
             <div className={`text-center transition-all duration-500 ${wordData ? 'mb-12' : 'mb-32 mt-20'}`}>
               {!wordData && loadingStage === 0 && (
                 <div className="mb-8 space-y-4">
-                  <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-xl">
+                  <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-xl heading-font">
                     Master words, <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">don't just memorize.</span>
                   </h1>
                   <p className="text-lg text-slate-300 max-w-xl mx-auto font-light">
